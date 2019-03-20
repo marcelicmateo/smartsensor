@@ -867,7 +867,7 @@ int  main()
 	{
 
 		while(DRDY_IS_LOW()){  //postavke za kanal 1; plus citanje;
-			ADS1256_WriteReg(REG_MUX, (0 << 4) | 1);
+			ADS1256_WriteReg(REG_MUX, (2 << 4) | 3);
 			bsp_DelayUS(5);
 
 			ADS1256_WriteCmd(CMD_SYNC);
@@ -883,15 +883,22 @@ int  main()
 	
 
 		while(DRDY_IS_LOW()){  // postavke za kanal 2; plus citanje
-			ADS1256_WriteReg(REG_MUX, (2 << 4) | 3);
+			//ADS1256_WriteReg(REG_MUX, (4 << 4) | 5);
+			CS_0();
+			ADS1256_Send8Bit(CMD_WREG | REG_MUX);	/*Write command register */
+			ADS1256_Send8Bit(0x00);		/*Write the register number */
+
+			ADS1256_Send8Bit(0x45);	//
 			bsp_DelayUS(5);
 
-			ADS1256_WriteCmd(CMD_SYNC);
+			//ADS1256_WriteCmd(CMD_SYNC);
+			ADS1256_Send8Bit(CMD_SYNC);
 			bsp_DelayUS(5);
 
-			ADS1256_WriteCmd(CMD_WAKEUP);
+			//ADS1256_WriteCmd(CMD_WAKEUP);
+			ADS1256_Send8Bit(CMD_WAKEUP);
 			bsp_DelayUS(25);
-
+			CS_1();
 			kanal2=ADS1256_ReadData();			
 		}
 		
