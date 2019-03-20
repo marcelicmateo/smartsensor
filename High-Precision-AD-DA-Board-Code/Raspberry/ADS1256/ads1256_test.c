@@ -895,7 +895,7 @@ int  main()
 		}
 		
 
-		printf("%ld;%ld", kanal1,kana2);
+		printf("%ld;%ld", kanal1,kanal2);
 		
 
 
@@ -939,4 +939,4 @@ int  main()
     bcm2835_close();
 	
     return 0;
-}       
+}
