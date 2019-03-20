@@ -635,7 +635,7 @@ static int32_t ADS1256_ReadData(void)
 	uint32_t read = 0;
     static uint8_t buf[3];
 
-//	CS_0();	/* SPI   cs = 0 */
+	CS_0();	/* SPI   cs = 0 */
 
 	ADS1256_Send8Bit(CMD_RDATA);	/* read ADC command  */
 
@@ -650,7 +650,7 @@ static int32_t ADS1256_ReadData(void)
     read |= ((uint32_t)buf[1] << 8);  /* Pay attention to It is wrong   read |= (buf[1] << 8) */
     read |= buf[2];
 
-//	CS_1();	/* SPIƬѡ = 1 */
+	CS_1();	/* SPIƬѡ = 1 */
 
 	/* Extend a signed number*/
     if (read & 0x800000)
@@ -862,7 +862,7 @@ int  main()
 		//{
 			//continue;
 		//}
-		CS_0();
+	
 	while(1)
 	{
 
