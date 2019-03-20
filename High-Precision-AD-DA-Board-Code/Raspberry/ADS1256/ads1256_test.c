@@ -867,7 +867,7 @@ int  main()
 	{
 
 		while(DRDY_IS_LOW()){  //postavke za kanal 1; plus citanje;
-			ADS1256_WriteReg(REG_MUX, (2 << 4) | 3);
+			ADS1256_WriteReg(REG_MUX, (0<< 4) | 1);
 			bsp_DelayUS(5);
 
 			ADS1256_WriteCmd(CMD_SYNC);
@@ -879,9 +879,9 @@ int  main()
 			kanal1=ADS1256_ReadData();			
 		}
 
-		
-	
 
+bsp_DelayUS(100000);	
+		
 		while(DRDY_IS_LOW()){  // postavke za kanal 2; plus citanje
 			//ADS1256_WriteReg(REG_MUX, (4 << 4) | 5);
 			CS_0();
@@ -903,11 +903,11 @@ int  main()
 		}
 		
 
-		printf("%ld;%ld\n", (kanal1*5*2/(pow(2,24)-1)),kanal2);
+		printf("%ld;%ld\n", kanal1,kanal2);
 		
 
 
-
+bsp_DelayUS(100000);
 
 
 
@@ -941,7 +941,7 @@ int  main()
 					
 		}
 			printf("\33[%dA", (int)ch_num);  
-*/		bsp_DelayUS(100000);	
+*/			
 	}	
     bcm2835_spi_end();
     bcm2835_close();
