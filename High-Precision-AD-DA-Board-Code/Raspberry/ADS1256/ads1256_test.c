@@ -867,7 +867,7 @@ int  main()
 	{
 
 		while(DRDY_IS_LOW()){  //postavke za kanal 1; plus citanje;
-			ADS1256_SetDiffChannal(0);
+			ADS1256_WriteReg(REG_MUX, (0 << 4) | 1);
 			bsp_DelayUS(5);
 
 			ADS1256_WriteCmd(CMD_SYNC);
@@ -883,7 +883,7 @@ int  main()
 	
 
 		while(DRDY_IS_LOW()){  // postavke za kanal 2; plus citanje
-			ADS1256_SetDiffChannal(1);
+			ADS1256_WriteReg(REG_MUX, (2 << 4) | 3);
 			bsp_DelayUS(5);
 
 			ADS1256_WriteCmd(CMD_SYNC);
