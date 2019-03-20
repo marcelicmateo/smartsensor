@@ -896,7 +896,7 @@ int  main()
 		}
 		
 
-		printf("%ld;%ld\n", kanal1,kanal2);
+		printf("%ld;%ld\n", (kanal1*5*2/(pow(2,24)-1)),kanal2);
 		
 
 
