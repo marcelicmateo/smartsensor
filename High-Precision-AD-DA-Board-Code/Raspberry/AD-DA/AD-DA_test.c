@@ -35,7 +35,6 @@ RPI_V2_GPIO_P1_13->RPI_GPIO_P1_13
 #include <math.h>
 #include <errno.h>
 
-
 //CS      -----   SPICS  
 //DIN     -----   MOSI
 //DOUT  -----   MISO
@@ -82,7 +81,7 @@ RPI_V2_GPIO_P1_13->RPI_GPIO_P1_13
 typedef enum {FALSE = 0, TRUE = !FALSE} bool;
 
 
-/* gain channelî */
+/* gain channelï¿½ */
 typedef enum
 {
 	ADS1256_GAIN_1			= (0),	/* GAIN   1 */
@@ -143,12 +142,12 @@ typedef struct
 	ADS1256_DRATE_E DataRate;	/* DATA output  speed*/
 	int32_t AdcNow[8];			/* ADC  Conversion value */
 	uint8_t Channel;			/* The current channel*/
-	uint8_t ScanMode;	/*Scanning mode,   0  Single-ended input  8 channel£¬ 1 Differential input  4 channel*/
+	uint8_t ScanMode;	/*Scanning mode,   0  Single-ended input  8 channelï¿½ï¿½ 1 Differential input  4 channel*/
 }ADS1256_VAR_T;
 
 
 
-/*Register definition£º Table 23. Register Map --- ADS1256 datasheet Page 30*/
+/*Register definitionï¿½ï¿½ Table 23. Register Map --- ADS1256 datasheet Page 30*/
 enum
 {
 	/*Register address, followed by reset the default values */
@@ -165,7 +164,7 @@ enum
 	REG_FSC2   = 10, // xxH
 };
 
-/* Command definition£º TTable 24. Command Definitions --- ADS1256 datasheet Page 34 */
+/* Command definitionï¿½ï¿½ TTable 24. Command Definitions --- ADS1256 datasheet Page 34 */
 enum
 {
 	CMD_WAKEUP  = 0x00,	// Completes SYNC and Exits Standby Mode 0000  0000 (00h)
@@ -246,7 +245,7 @@ void  bsp_DelayUS(uint64_t micros)
 /*
 *********************************************************************************************************
 *	name: bsp_InitADS1256
-*	function: Configuration of the STM32 GPIO and SPI interface£¬The connection ADS1256
+*	function: Configuration of the STM32 GPIO and SPI interfaceï¿½ï¿½The connection ADS1256
 *	parameter: NULL
 *	The return value: NULL
 *********************************************************************************************************
@@ -261,7 +260,7 @@ void bsp_InitADS1256(void)
 	DI_0();
 #endif
 
-//ADS1256_CfgADC(ADS1256_GAIN_1, ADS1256_1000SPS);	/* ÅäÖÃADC²ÎÊý£º ÔöÒæ1:1, Êý¾ÝÊä³öËÙÂÊ 1KHz */
+//ADS1256_CfgADC(ADS1256_GAIN_1, ADS1256_1000SPS);	/* ï¿½ï¿½ï¿½ï¿½ADCï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½1:1, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 1KHz */
 }
 
 
@@ -271,14 +270,14 @@ void bsp_InitADS1256(void)
 *********************************************************************************************************
 *	name: ADS1256_StartScan
 *	function: Configuration DRDY PIN for external interrupt is triggered
-*	parameter: _ucDiffMode : 0  Single-ended input  8 channel£¬ 1 Differential input  4 channe
+*	parameter: _ucDiffMode : 0  Single-ended input  8 channelï¿½ï¿½ 1 Differential input  4 channe
 *	The return value: NULL
 *********************************************************************************************************
 */
 void ADS1256_StartScan(uint8_t _ucScanMode)
 {
 	g_tADS1256.ScanMode = _ucScanMode;
-	/* ¿ªÊ¼É¨ÃèÇ°, ÇåÁã½á¹û»º³åÇø */
+	/* ï¿½ï¿½Ê¼É¨ï¿½ï¿½Ç°, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ */
 	{
 		uint8_t i;
 
@@ -369,9 +368,9 @@ void ADS1256_CfgADC(ADS1256_GAIN_E _gain, ADS1256_DRATE_E _drate)
 
 			Bits 4-3 SDCS1, SCDS0: Sensor Detect Current Sources
 				00 = Sensor Detect OFF (default)
-				01 = Sensor Detect Current = 0.5 ¦Ì A
-				10 = Sensor Detect Current = 2 ¦Ì A
-				11 = Sensor Detect Current = 10¦Ì A
+				01 = Sensor Detect Current = 0.5 ï¿½ï¿½ A
+				10 = Sensor Detect Current = 2 ï¿½ï¿½ A
+				11 = Sensor Detect Current = 10ï¿½ï¿½ A
 				The Sensor Detect Current Sources can be activated to verify  the integrity of an external sensor supplying a signal to the
 				ADS1255/6. A shorted sensor produces a very small signal while an open-circuit sensor produces a very large signal.
 
@@ -535,7 +534,7 @@ static void ADS1256_SetChannal(uint8_t _ch)
 		0101 = AIN5 (ADS1256 only)
 		0110 = AIN6 (ADS1256 only)
 		0111 = AIN7 (ADS1256 only)
-		1xxx = AINCOM (when PSEL3 = 1, PSEL2, PSEL1, PSEL0 are ¡°don¡¯t care¡±)
+		1xxx = AINCOM (when PSEL3 = 1, PSEL2, PSEL1, PSEL0 are ï¿½ï¿½donï¿½ï¿½t careï¿½ï¿½)
 
 		NOTE: When using an ADS1255 make sure to only select the available inputs.
 
@@ -548,7 +547,7 @@ static void ADS1256_SetChannal(uint8_t _ch)
 		0101 = AIN5 (ADS1256 only)
 		0110 = AIN6 (ADS1256 only)
 		0111 = AIN7 (ADS1256 only)
-		1xxx = AINCOM (when NSEL3 = 1, NSEL2, NSEL1, NSEL0 are ¡°don¡¯t care¡±)
+		1xxx = AINCOM (when NSEL3 = 1, NSEL2, NSEL1, NSEL0 are ï¿½ï¿½donï¿½ï¿½t careï¿½ï¿½)
 	*/
 	if (_ch > 7)
 	{
@@ -577,7 +576,7 @@ static void ADS1256_SetDiffChannal(uint8_t _ch)
 		0101 = AIN5 (ADS1256 only)
 		0110 = AIN6 (ADS1256 only)
 		0111 = AIN7 (ADS1256 only)
-		1xxx = AINCOM (when PSEL3 = 1, PSEL2, PSEL1, PSEL0 are ¡°don¡¯t care¡±)
+		1xxx = AINCOM (when PSEL3 = 1, PSEL2, PSEL1, PSEL0 are ï¿½ï¿½donï¿½ï¿½t careï¿½ï¿½)
 
 		NOTE: When using an ADS1255 make sure to only select the available inputs.
 
@@ -590,23 +589,23 @@ static void ADS1256_SetDiffChannal(uint8_t _ch)
 		0101 = AIN5 (ADS1256 only)
 		0110 = AIN6 (ADS1256 only)
 		0111 = AIN7 (ADS1256 only)
-		1xxx = AINCOM (when NSEL3 = 1, NSEL2, NSEL1, NSEL0 are ¡°don¡¯t care¡±)
+		1xxx = AINCOM (when NSEL3 = 1, NSEL2, NSEL1, NSEL0 are ï¿½ï¿½donï¿½ï¿½t careï¿½ï¿½)
 	*/
 	if (_ch == 0)
 	{
-		ADS1256_WriteReg(REG_MUX, (0 << 4) | 1);	/* DiffChannal  AIN0£¬ AIN1 */
+		ADS1256_WriteReg(REG_MUX, (0 << 4) | 1);	/* DiffChannal  AIN0ï¿½ï¿½ AIN1 */
 	}
 	else if (_ch == 1)
 	{
-		ADS1256_WriteReg(REG_MUX, (2 << 4) | 3);	/*DiffChannal   AIN2£¬ AIN3 */
+		ADS1256_WriteReg(REG_MUX, (2 << 4) | 3);	/*DiffChannal   AIN2ï¿½ï¿½ AIN3 */
 	}
 	else if (_ch == 2)
 	{
-		ADS1256_WriteReg(REG_MUX, (4 << 4) | 5);	/*DiffChannal    AIN4£¬ AIN5 */
+		ADS1256_WriteReg(REG_MUX, (4 << 4) | 5);	/*DiffChannal    AIN4ï¿½ï¿½ AIN5 */
 	}
 	else if (_ch == 3)
 	{
-		ADS1256_WriteReg(REG_MUX, (6 << 4) | 7);	/*DiffChannal   AIN6£¬ AIN7 */
+		ADS1256_WriteReg(REG_MUX, (6 << 4) | 7);	/*DiffChannal   AIN6ï¿½ï¿½ AIN7 */
 	}
 }
 
@@ -707,7 +706,7 @@ int32_t ADS1256_GetAdc(uint8_t _ch)
 */
 void ADS1256_ISR(void)
 {
-	if (g_tADS1256.ScanMode == 0)	/*  0  Single-ended input  8 channel£¬ 1 Differential input  4 channe */
+	if (g_tADS1256.ScanMode == 0)	/*  0  Single-ended input  8 channelï¿½ï¿½ 1 Differential input  4 channe */
 	{
 
 		ADS1256_SetChannal(g_tADS1256.Channel);	/*Switch channel mode */
