@@ -855,7 +855,7 @@ int  main()
 	{
 		printf("Ok, ASD1256 Chip ID = 0x%d\r\n", (int)id);
 	}
-  	ADS1256_CfgADC(ADS1256_GAIN_1, ADS1256_15SPS);
+  	ADS1256_CfgADC(ADS1256_GAIN_1, ADS1256_30000SPS);
     ADS1256_StartScan(1);
 	ch_num = 2;	
 	//if (ADS1256_Scan() == 0)
@@ -876,11 +876,11 @@ int  main()
 			ADS1256_WriteCmd(CMD_WAKEUP);
 			bsp_DelayUS(25);
 
-			kanal1=ADS1256_ReadData();			
+			kanal2=ADS1256_ReadData();		// cita se jedan kanal unatrag	
 		}
 
 
-bsp_DelayUS(100000);	
+bsp_DelayUS(10);	
 		
 		while(DRDY_IS_LOW()){  // postavke za kanal 2; plus citanje
 			//ADS1256_WriteReg(REG_MUX, (4 << 4) | 5);
@@ -899,7 +899,7 @@ bsp_DelayUS(100000);
 			ADS1256_Send8Bit(CMD_WAKEUP);
 			bsp_DelayUS(25);
 			CS_1();
-			kanal2=ADS1256_ReadData();			
+			kanal1=ADS1256_ReadData();			//cita se jedan kanal unatrag
 		}
 		
 
@@ -907,41 +907,7 @@ bsp_DelayUS(100000);
 		
 
 
-bsp_DelayUS(100000);
-
-
-
-/*
-
-	    while((ADS1256_Scan() == 0));
-		for (i = 0; i < ch_num; i++)
-		{
-			adc[i] = ADS1256_GetAdc(i);
-              	 volt[i] = (adc[i] * 100) / 167;	
-		}
-		
-		for (i = 0; i < ch_num; i++)
-		{
-	                buf[0] = ((uint32_t)adc[i] >> 16) & 0xFF;
-	                buf[1] = ((uint32_t)adc[i] >> 8) & 0xFF;
-	                buf[2] = ((uint32_t)adc[i] >> 0) & 0xFF;
-	                printf("%d=%02X%02X%02X, %8ld", (int)i, (int)buf[0], 
-	                       (int)buf[1], (int)buf[2], (long)adc[i]);                
-
-	                iTemp = volt[i];	/* uV  
-					if (iTemp < 0)
-					{
-						iTemp = -iTemp;
-	                  		  	printf(" (-%ld.%03ld %03ld V) \r\n", iTemp /1000000, (iTemp%1000000)/1000, iTemp%1000);
-					}
-					else
-					{
-	                    			printf(" ( %ld.%03ld %03ld V) \r\n", iTemp /1000000, (iTemp%1000000)/1000, iTemp%1000);                    
-					}
-					
-		}
-			printf("\33[%dA", (int)ch_num);  
-*/			
+bsp_DelayUS(10);	
 	}	
     bcm2835_spi_end();
     bcm2835_close();
