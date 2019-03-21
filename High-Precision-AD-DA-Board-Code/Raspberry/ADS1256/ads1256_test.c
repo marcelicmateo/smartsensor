@@ -34,6 +34,7 @@ RPI_V2_GPIO_P1_13->RPI_GPIO_P1_13
 #include <string.h>
 #include <math.h>
 #include <errno.h>
+#include<time.h>
 
 //CS      -----   SPICS  
 //DIN     -----   MOSI
@@ -823,6 +824,11 @@ int  main()
 	uint8_t ch_num;
 	int32_t iTemp;
 	uint8_t buf[3];
+ 
+     clock_t start, end;
+     double cpu_time_used;
+
+
     if (!bcm2835_init())
         return 1;
 /*
@@ -863,7 +869,9 @@ int  main()
 			//continue;
 		//}
 	
-	while(1)
+	id=0;
+	start=clock();
+	while(id<3000)
 	{
 
 		while(DRDY_IS_LOW()){  //postavke za kanal 1; plus citanje;
@@ -903,12 +911,13 @@ bsp_DelayUS(10);
 		}
 		
 
-		printf("%ld;%ld\n", kanal1,kanal2);
+		//printf("%ld;%ld\n", kanal1,kanal2);
 		
 
-
+		id++;
 bsp_DelayUS(10);	
 	}	
+	end=clock();
     bcm2835_spi_end();
     bcm2835_close();
 	
