@@ -824,6 +824,7 @@ int  main()
 	uint8_t ch_num;
 	int32_t iTemp;
 	uint8_t buf[3];
+	FILE *fp;
  
      clock_t start, end;
      double cpu_time_used;
@@ -869,10 +870,11 @@ int  main()
 			//continue;
 		//}
 	
-	id=0;
-	start=clock();
-	while(id<3000)
+
+	
+	while(1)
 	{
+		fp=fopen("data.txt","a");
 
 		while(DRDY_IS_LOW()){  //postavke za kanal 1; plus citanje;
 			ADS1256_WriteReg(REG_MUX, (0<< 4) | 1);
@@ -888,7 +890,7 @@ int  main()
 		}
 
 
-bsp_DelayUS(10);	
+		bsp_DelayUS(10000);	
 		
 		while(DRDY_IS_LOW()){  // postavke za kanal 2; plus citanje
 			//ADS1256_WriteReg(REG_MUX, (4 << 4) | 5);
@@ -911,13 +913,14 @@ bsp_DelayUS(10);
 		}
 		
 
-		//printf("%ld;%ld\n", kanal1,kanal2);
+		printf("%ld;%ld\n", kanal1,kanal2);
 		
+		fprintf(fp,"%ld;%ld\n", kanal1, kanal2);
 
-		id++;
-bsp_DelayUS(10);	
+		fclose(fp);
+		bsp_DelayUS(10000);	
 	}	
-	end=clock();
+	
     bcm2835_spi_end();
     bcm2835_close();
 	
