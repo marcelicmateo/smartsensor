@@ -13,7 +13,7 @@
        RPI_GPIO_P1_07 | | RPI_GPIO_P1_08   ->                  IO7 | | TX
                   GND | | RPI_GPIO_P1_10   ->                  GND | | RX
        RPI_GPIO_P1_11 | | RPI_GPIO_P1_12   ->                  IO0 | | IO1
-    RPI_V2_GPIO_P1_13 | | GND              ->                  IO2 | | GND
+>    RPI_V2_GPIO_P1_13 | | GND              ->                  IO2 | | GND
        RPI_GPIO_P1_15 | | RPI_GPIO_P1_16   ->                  IO3 | | IO4
                   VCC | | RPI_GPIO_P1_18   ->                  VCC | | IO5
        RPI_GPIO_P1_19 | | GND              ->                 MOSI | | GND
@@ -862,7 +862,7 @@ int  main()
 	{
 		printf("Ok, ASD1256 Chip ID = 0x%d\r\n", (int)id);
 	}
-  	ADS1256_CfgADC(ADS1256_GAIN_1, ADS1256_30000SPS);
+  	ADS1256_CfgADC(ADS1256_GAIN_1, ADS1256_60SPS);
     ADS1256_StartScan(1);
 	ch_num = 2;	
 	//if (ADS1256_Scan() == 0)
@@ -877,7 +877,7 @@ int  main()
 		fp=fopen("data.txt","a");
 
 		while(DRDY_IS_LOW()){  //postavke za kanal 1; plus citanje;
-			ADS1256_WriteReg(REG_MUX, (0<< 4) | 1);
+			ADS1256_WriteReg(REG_MUX, (0 << 4) | 1);
 			bsp_DelayUS(5);
 
 			ADS1256_WriteCmd(CMD_SYNC);
@@ -890,7 +890,7 @@ int  main()
 		}
 
 
-		bsp_DelayUS(10000);	
+		bsp_DelayUS(100000);	
 		
 		while(DRDY_IS_LOW()){  // postavke za kanal 2; plus citanje
 			//ADS1256_WriteReg(REG_MUX, (4 << 4) | 5);
@@ -898,7 +898,7 @@ int  main()
 			ADS1256_Send8Bit(CMD_WREG | REG_MUX);	/*Write command register */
 			ADS1256_Send8Bit(0x00);		/*Write the register number */
 
-			ADS1256_Send8Bit(0x45);	//
+			ADS1256_Send8Bit(0x23);	//
 			bsp_DelayUS(5);
 
 			//ADS1256_WriteCmd(CMD_SYNC);
@@ -913,12 +913,13 @@ int  main()
 		}
 		
 
-		printf("%ld;%ld\n", kanal1,kanal2);
+		//printf("%ld;%ld\n", kanal1,kanal2);
+		
 		
 		fprintf(fp,"%ld;%ld\n", kanal1, kanal2);
 
 		fclose(fp);
-		bsp_DelayUS(10000);	
+		bsp_DelayUS(100000);	
 	}	
 	
     bcm2835_spi_end();
