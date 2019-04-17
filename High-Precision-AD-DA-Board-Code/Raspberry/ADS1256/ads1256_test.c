@@ -913,7 +913,7 @@ int  main()
 		}
 		
 
-		//printf("%ld;%ld\n", kanal1,kanal2);
+		printf("%ld;%ld\n", kanal1,kanal2);
 		
 		
 		fprintf(fp,"%ld;%ld\n", kanal1, kanal2);
