@@ -52,6 +52,8 @@ RPI_V2_GPIO_P1_13->RPI_GPIO_P1_13
 //#define	SPICS	RPI_V2_GPIO_P1_15	//P3
 #define  SPICS  22
 
+#define POWERPIN RPI_GPIO_P1_07 //P7 pin za paljenje i gasenje
+
 #define CS_1() bcm2835_gpio_write(SPICS,HIGH)
 #define CS_0()  bcm2835_gpio_write(SPICS,LOW)
 
@@ -816,8 +818,8 @@ uint16_t Voltage_Convert(float Vref, float voltage)
 int  main()
 {
       uint8_t id,i,j;
-	  int32_t kanal1=0;
-	  int32_t kanal2=0;
+	  int32_t kanal1[101];
+	  int32_t kanal2[101];
   	int32_t adc[8];
 	int32_t volt[8];
 	uint8_t ch_num;
@@ -846,37 +848,37 @@ int  main()
     bcm2835_gpio_fsel(SPICS, BCM2835_GPIO_FSEL_OUTP);//
     bcm2835_gpio_write(SPICS, HIGH);
     bcm2835_gpio_fsel(DRDY, BCM2835_GPIO_FSEL_INPT);
-    bcm2835_gpio_set_pud(DRDY, BCM2835_GPIO_PUD_UP);    	
-    //ADS1256_WriteReg(REG_MUX,0x01);
-    //ADS1256_WriteReg(REG_ADCON,0x20);
-   // ADS1256_CfgADC(ADS1256_GAIN_1, ADS1256_15SPS);
+    bcm2835_gpio_set_pud(DRDY, BCM2835_GPIO_PUD_UP);
+    bcm2835_gpio_fsel(POWERPIN, BCM2835_GPIO_FSEL_OUTP);
+    bcm2835_gpio_write(POWERPIN,HIGH);
+	bsp_DelayUS(47000);  //pauza da se upali napajenja kruga
+
    id = ADS1256_ReadChipID();
    printf("\r\n");
-   printf("ID=\r\n");  
+   printf("ID=\r\n");
 	if (id != 3)
 	{
-		printf("Error, ASD1256 Chip ID = 0x%d\r\n", (int)id);
+		printf("Error, ASD1256 Chip ID = 0x%d\r\n", (int)id); return 1;
 	}
 	else
 	{
 		printf("Ok, ASD1256 Chip ID = 0x%d\r\n", (int)id);
 	}
-  	ADS1256_CfgADC(ADS1256_GAIN_1, ADS1256_30000SPS);
-    ADS1256_StartScan(1);
-	ch_num = 2;	
+  	ADS1256_CfgADC(ADS1256_GAIN_1, ADS1256_3750SPS);
+        ADS1256_StartScan(1);
+	ch_num = 2;
 	//if (ADS1256_Scan() == 0)
 		//{
 			//continue;
 		//}
-	
 
-	
-	while(1)
-	{	
-		fp=fopen("data2.txt","a+");
-		fprintf(fp,"sparta\n");
-		printf("sparta\n");
-		
+
+printf("this is\n");
+while(1){
+	printf("sparta1\n");
+	for(i=0;i<101;i++){
+
+		while(DRDY_IS_LOW());
 		ADS1256_WriteReg(REG_MUX, 0x01);
 		bsp_DelayUS(5);
 
@@ -885,18 +887,34 @@ int  main()
 
                 ADS1256_WriteCmd(CMD_WAKEUP);
                 bsp_DelayUS(25);
-		for(j=0;j<100;j++){
-		for(i=0;i<5;i++){
-		while(!DRDY_IS_LOW());
-		bsp_DelayUS(210);
-}
-		while(!DRDY_IS_LOW());
-		kanal[j]=ADS1256_ReadData();
-}
 
-		for(j=0;j<100;j++){ fprintf(fp,"%ld\n",kanal[j]);}
+		kanal2[i]=ADS1256_ReadData();
+		while(!DRDY_IS_LOW());
 
-		bsp_DelayUS(50000000);
+		while(DRDY_IS_LOW());
+
+		ADS1256_WriteReg(REG_MUX,0x23);
+		bsp_DelayUS(5);
+		ADS1256_WriteCmd(CMD_SYNC);
+		bsp_DelayUS(5);
+		ADS1256_WriteCmd(CMD_WAKEUP);
+		bsp_DelayUS(25);
+
+		kanal1[i]=ADS1256_ReadData();
+		while(!DRDY_IS_LOW());
+
+}
+		bcm2835_gpio_write(POWERPIN,LOW); //ugasi napajanje
+
+		printf("sparta2\n");
+
+		fp=fopen("data.txt","a+");
+		for(i=0;i<100;i++){ fprintf(fp,"%ld;%ld\n",kanal1[i+1],kanal2[i+1]);}
+		fclose(fp);
+
+		bsp_DelayUS(5000000);
+		bcm2835_gpio_write(POWERPIN,HIGH); //upali napajanje
+		bsp_DelayUS(47000);
 
 /*
 		while(DRDY_IS_LOW()){  //postavke za kanal 1; plus citanje;
@@ -931,23 +949,21 @@ int  main()
 			//ADS1256_WriteCmd(CMD_WAKEUP);
 			ADS1256_Send8Bit(CMD_WAKEUP);
 			bsp_DelayUS(25);
-			CS_1();		
+			CS_1();
 	kanal1=ADS1256_ReadData();			//cita se jedan kanal unatrag
 		}
-		
-		
+
+
 		printf("%ld;%ld\n", kanal1,kanal2);
-		
-		
+
 		fprintf(fp,"%ld;%ld\n", kanal1, kanal2);
 */
 
-		fclose(fp);
-		bsp_DelayUS(100000);	
-	}	
-	
+
+	}
+
     bcm2835_spi_end();
     bcm2835_close();
-	
+
     return 0;
 }
