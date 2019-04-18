@@ -815,14 +815,13 @@ uint16_t Voltage_Convert(float Vref, float voltage)
 
 int  main()
 {
-      uint8_t id;
+      uint8_t id,i,j;
 	  int32_t kanal1=0;
 	  int32_t kanal2=0;
   	int32_t adc[8];
 	int32_t volt[8];
-	uint8_t i;
 	uint8_t ch_num;
-	int32_t iTemp;
+	int32_t kanal[100];
 	uint8_t buf[3];
 	FILE *fp;
  
@@ -862,7 +861,7 @@ int  main()
 	{
 		printf("Ok, ASD1256 Chip ID = 0x%d\r\n", (int)id);
 	}
-  	ADS1256_CfgADC(ADS1256_GAIN_1, ADS1256_60SPS);
+  	ADS1256_CfgADC(ADS1256_GAIN_1, ADS1256_30000SPS);
     ADS1256_StartScan(1);
 	ch_num = 2;	
 	//if (ADS1256_Scan() == 0)
@@ -873,9 +872,33 @@ int  main()
 
 	
 	while(1)
-	{
-		fp=fopen("data.txt","a");
+	{	
+		fp=fopen("data2.txt","a+");
+		fprintf(fp,"sparta\n");
+		printf("sparta\n");
+		
+		ADS1256_WriteReg(REG_MUX, 0x01);
+		bsp_DelayUS(5);
 
+		ADS1256_WriteCmd(CMD_SYNC);
+                bsp_DelayUS(5);
+
+                ADS1256_WriteCmd(CMD_WAKEUP);
+                bsp_DelayUS(25);
+		for(j=0;j<100;j++){
+		for(i=0;i<5;i++){
+		while(!DRDY_IS_LOW());
+		bsp_DelayUS(210);
+}
+		while(!DRDY_IS_LOW());
+		kanal[j]=ADS1256_ReadData();
+}
+
+		for(j=0;j<100;j++){ fprintf(fp,"%ld\n",kanal[j]);}
+
+		bsp_DelayUS(50000000);
+
+/*
 		while(DRDY_IS_LOW()){  //postavke za kanal 1; plus citanje;
 			ADS1256_WriteReg(REG_MUX, (0 << 4) | 1);
 			bsp_DelayUS(5);
@@ -895,8 +918,8 @@ int  main()
 		while(DRDY_IS_LOW()){  // postavke za kanal 2; plus citanje
 			//ADS1256_WriteReg(REG_MUX, (4 << 4) | 5);
 			CS_0();
-			ADS1256_Send8Bit(CMD_WREG | REG_MUX);	/*Write command register */
-			ADS1256_Send8Bit(0x00);		/*Write the register number */
+			ADS1256_Send8Bit(CMD_WREG | REG_MUX);	//Write command register 
+			ADS1256_Send8Bit(0x00);		//Write the register number 
 
 			ADS1256_Send8Bit(0x23);	//
 			bsp_DelayUS(5);
@@ -908,15 +931,16 @@ int  main()
 			//ADS1256_WriteCmd(CMD_WAKEUP);
 			ADS1256_Send8Bit(CMD_WAKEUP);
 			bsp_DelayUS(25);
-			CS_1();
-			kanal1=ADS1256_ReadData();			//cita se jedan kanal unatrag
+			CS_1();		
+	kanal1=ADS1256_ReadData();			//cita se jedan kanal unatrag
 		}
 		
-
+		
 		printf("%ld;%ld\n", kanal1,kanal2);
 		
 		
 		fprintf(fp,"%ld;%ld\n", kanal1, kanal2);
+*/
 
 		fclose(fp);
 		bsp_DelayUS(100000);	
