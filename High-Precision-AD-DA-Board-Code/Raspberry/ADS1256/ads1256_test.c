@@ -825,7 +825,7 @@ int  main()
 	uint8_t ch_num;
 	int32_t kanal[100];
 	uint8_t buf[3];
-	FILE *fp;
+	FILE *k1,*k2;
  
      clock_t start, end;
      double cpu_time_used;
@@ -908,9 +908,13 @@ while(1){
 
 		printf("sparta2\n");
 
-		fp=fopen("data.txt","a+");
-		for(i=0;i<100;i++){ fprintf(fp,"%ld;%ld\n",kanal1[i+1],kanal2[i+1]);}
-		fclose(fp);
+		k1=fopen("kanal1","ab+");
+		k2=fopen("kanal2","ab+");
+		for(i=0;i<100;i++){ fprintf(k1,"%08ld;",kanal1[i+1]); fprintf(k2,"%08ld;",kanal2[i+1]); }
+		fprintf(k1,"\n"); fprintf(k2,"\n");
+		fclose(k1); fclose(k2);
+
+		//for(i=0;i<101;i++){printf("%08ld;%08ld\n",kanal1[i],kanal2[i]);} //testno printanje
 
 		bsp_DelayUS(5000000);
 		bcm2835_gpio_write(POWERPIN,HIGH); //upali napajanje
