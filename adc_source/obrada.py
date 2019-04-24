@@ -53,22 +53,29 @@ Urshunt=kanal1[1]*srs/kanal2[1]
 
 s=math.sqrt(Untc**2+Urshunt**2+Ushunt**2)       #devijacija otpora ntca
 
-temperatura=(math.log(rntc/22000)/3740 + 1/(25+273.15))**(-1)
+temperatura=(math.log(rntc/22000)/3740 + 1/(25+273.15))**(-1)-273.15
 
-print(temperatura - 273.15) 
+#print(temperatura) 
 
 
 
-f=open("data_log.txt","ab")
+f=open("data_log.txt","a+")
 log={"timestamp": st,
-     "kanal1":kanal1[0],
-     "kanal1_mean":kanal1[1],
-     "kanal1_std":kanal1[2],
-     "kanal2":kanal2[0],
-     "kanal2_mean":kanal2[1],
-     "kanal2_std":kanal2[2],
-
+     "U_ntc_raw":kanal1[0],
+     "U_ntc_mean":kanal1[1],
+     "U_ntc_std":kanal1[2],
+     "U_shunt_raw":kanal2[0],
+     "U_ntc_mean":kanal2[1],
+     "U_ntc_std":kanal2[2],
+     "otpor_ntc":rntc,
+     "devijacija_ntc":s,
+     "tempratura_celzij":temperatura
      }
+
+y=json.dumps(log)   #log in to file
+#print("%s\n" % y)
+f.write("%s\n" % y)
+f.close()
 
 
 
