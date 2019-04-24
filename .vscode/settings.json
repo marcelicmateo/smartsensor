@@ -1,7 +1,4 @@
 {
-    "C_Cpp.intelliSenseEngineFallback": "Disabled",
-    "files.associations": {
-        "bcm2835.h": "c",
-        "stdio.h": "c"
-    }
+    "python.linting.pylintEnabled": true,
+    "python.linting.enabled": true
 }
