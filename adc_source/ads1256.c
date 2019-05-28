@@ -820,7 +820,8 @@ void config(unsigned int *k){
 
 void sig_usr1(int signum, siginfo_t *info, void *ptr)
 {
-    config(conf);
+   // config(conf);
+	printf("signal uhvacen\n");
 
 }
 
@@ -860,7 +861,7 @@ int  main()
     clock_t start, end;
     double cpu_time_used;
 
-	catch_sigusr1()
+	catch_sigusr1();
 
 	if (!bcm2835_init())
         return 1;
