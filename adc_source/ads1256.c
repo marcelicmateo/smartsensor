@@ -807,6 +807,7 @@ uint16_t Voltage_Convert(float Vref, float voltage)
 }
 
 
+unsigned int conf[3]={3,100,5*1000*1000};//sps, nsps, sleep time
 
 void config(unsigned int *k){
 	FILE *f;
@@ -816,6 +817,22 @@ void config(unsigned int *k){
 	return 0;
 }
 
+void sig_usr1(int signum, siginfo_t *info, void *ptr)
+{
+    config(conf);
+
+}
+
+void catch_sigusr1()
+{
+    static struct sigaction _sigact;
+
+    memset(&_sigact, 0, sizeof(_sigact));
+    _sigact.sa_sigaction = sig_usr1;
+    _sigact.sa_flags = SA_SIGINFO;
+
+    sigaction(SIGUSR1, &_sigact, NULL);
+}
 /*
 *********************************************************************************************************
 *	name: main
@@ -824,7 +841,6 @@ void config(unsigned int *k){
 *	The return value:  NULL
 *********************************************************************************************************
 */
-unsigned int conf[3]={3,100,5*1000*1000};//sps, nsps, sleep time
 
 
 int  main()
@@ -843,6 +859,7 @@ int  main()
     clock_t start, end;
     double cpu_time_used;
 
+	catch_sigusr1()
 
 	if (!bcm2835_init())
         return 1;
