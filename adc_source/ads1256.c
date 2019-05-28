@@ -806,28 +806,6 @@ uint16_t Voltage_Convert(float Vref, float voltage)
 	return _D_;
 }
 
-int bcm_init()
-{
-
-	if (!bcm2835_init())
-        return 1;
-
-    bcm2835_spi_begin();
-    bcm2835_spi_setBitOrder(BCM2835_SPI_BIT_ORDER_MSBFIRST);   //default
-    bcm2835_spi_setDataMode(BCM2835_SPI_MODE1);                //default
-    bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_256);//default
-
-    bcm2835_gpio_fsel(SPICS, BCM2835_GPIO_FSEL_OUTP);//
-    bcm2835_gpio_write(SPICS, HIGH);
-    bcm2835_gpio_fsel(DRDY, BCM2835_GPIO_FSEL_INPT);
-    bcm2835_gpio_set_pud(DRDY, BCM2835_GPIO_PUD_UP);
-    bcm2835_gpio_fsel(POWERPIN, BCM2835_GPIO_FSEL_OUTP);
-    bcm2835_gpio_write(POWERPIN,HIGH);
-	bsp_DelayUS(47000);  //pauza da se upali napajenja kruga
-
-    return 0;
-}
-
 
 
 void config(unsigned int *k){
@@ -866,9 +844,21 @@ int  main()
     double cpu_time_used;
 
 
-	if(bcm_init){
-		return 1;
-	}
+	if (!bcm2835_init())
+        return 1;
+
+    bcm2835_spi_begin();
+    bcm2835_spi_setBitOrder(BCM2835_SPI_BIT_ORDER_MSBFIRST);   //default
+    bcm2835_spi_setDataMode(BCM2835_SPI_MODE1);                //default
+    bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_256);//default
+
+    bcm2835_gpio_fsel(SPICS, BCM2835_GPIO_FSEL_OUTP);//
+    bcm2835_gpio_write(SPICS, HIGH);
+    bcm2835_gpio_fsel(DRDY, BCM2835_GPIO_FSEL_INPT);
+    bcm2835_gpio_set_pud(DRDY, BCM2835_GPIO_PUD_UP);
+    bcm2835_gpio_fsel(POWERPIN, BCM2835_GPIO_FSEL_OUTP);
+    bcm2835_gpio_write(POWERPIN,HIGH);
+	bsp_DelayUS(47000);  //pauza da se upali napajenja kruga
 
    id = ADS1256_ReadChipID();
    printf("\r\n");
