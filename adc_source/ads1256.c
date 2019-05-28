@@ -806,40 +806,12 @@ uint16_t Voltage_Convert(float Vref, float voltage)
 	return _D_;
 }
 
-/*
-*********************************************************************************************************
-*	name: main
-*	function:  
-*	parameter: NULL
-*	The return value:  NULL
-*********************************************************************************************************
-*/
-
-int  main()
+int bcm_init()
 {
-      uint8_t id,i,j;
-	  int32_t kanal1[101];
-	  int32_t kanal2[101];
-  	int32_t adc[8];
-	int32_t volt[8];
-	uint8_t ch_num;
-	int32_t kanal[100];
-	uint8_t buf[3];
-	FILE *k1,*k2;
- 
-     clock_t start, end;
-     double cpu_time_used;
 
-
-    if (!bcm2835_init())
+	if (!bcm2835_init())
         return 1;
-/*
-    bcm2835_spi_begin();
-    bcm2835_spi_setBitOrder(BCM2835_SPI_BIT_ORDER_LSBFIRST );      // The default
-    bcm2835_spi_setDataMode(BCM2835_SPI_MODE1);                   // The default
-    bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_1024); // The default
-*/
-  
+
     bcm2835_spi_begin();
     bcm2835_spi_setBitOrder(BCM2835_SPI_BIT_ORDER_MSBFIRST);   //default
     bcm2835_spi_setDataMode(BCM2835_SPI_MODE1);                //default
@@ -853,6 +825,51 @@ int  main()
     bcm2835_gpio_write(POWERPIN,HIGH);
 	bsp_DelayUS(47000);  //pauza da se upali napajenja kruga
 
+    return 0;
+}
+
+
+
+void config(unsigned int *k){
+	FILE *f;
+	f=fopen("conf","rb");
+	fread(k, sizeof(unsigned int), 3, f);
+	fclose(f);
+	return 0;
+}
+
+/*
+*********************************************************************************************************
+*	name: main
+*	function:  
+*	parameter: NULL
+*	The return value:  NULL
+*********************************************************************************************************
+*/
+unsigned int conf[3]={3,100,5*1000*1000} //sps, nsps, sleep time
+
+
+int  main()
+{
+    uint8_t id,i,j;
+	int32_t kanal1[101];
+	int32_t kanal2[101];
+  	int32_t adc[8];
+	int32_t volt[8];
+	uint8_t ch_num;
+	int32_t kanal[100];
+	uint8_t buf[3];
+	//unsigned int conf[3]={3,100,5*1000*1000} //sps, nsps, sleep time
+	FILE *k1,*k2;
+ 
+    clock_t start, end;
+    double cpu_time_used;
+
+
+	if(bcm_init){
+		return 1;
+	}
+
    id = ADS1256_ReadChipID();
    printf("\r\n");
    printf("ID=\r\n");
@@ -864,7 +881,7 @@ int  main()
 	{
 		printf("Ok, ASD1256 Chip ID = 0x%d\r\n", (int)id);
 	}
-  	ADS1256_CfgADC(ADS1256_GAIN_1, ADS1256_3750SPS);
+  	ADS1256_CfgADC(ADS1256_GAIN_1, conf[0]);
         ADS1256_StartScan(1);
 	ch_num = 2;
 	//if (ADS1256_Scan() == 0)
@@ -876,7 +893,7 @@ int  main()
 printf("this is\n");
 while(1){
 	printf("sparta1\n");
-	for(i=0;i<101;i++){
+	for(i=0;i<(conf[1]+1);i++){
 
 		while(DRDY_IS_LOW());
 		ADS1256_WriteReg(REG_MUX, 0x01);
@@ -914,56 +931,9 @@ while(1){
 		fprintf(k1,"\n"); fprintf(k2,"\n");
 		fclose(k1); fclose(k2);
 
-		//for(i=0;i<101;i++){printf("%08ld;%08ld\n",kanal1[i],kanal2[i]);} //testno printanje
-
-		bsp_DelayUS(5000000);
+		bsp_DelayUS(conf[2]);
 		bcm2835_gpio_write(POWERPIN,HIGH); //upali napajanje
 		bsp_DelayUS(47000);
-
-/*
-		while(DRDY_IS_LOW()){  //postavke za kanal 1; plus citanje;
-			ADS1256_WriteReg(REG_MUX, (0 << 4) | 1);
-			bsp_DelayUS(5);
-
-			ADS1256_WriteCmd(CMD_SYNC);
-			bsp_DelayUS(5);
-
-			ADS1256_WriteCmd(CMD_WAKEUP);
-			bsp_DelayUS(25);
-
-			kanal2=ADS1256_ReadData();		// cita se jedan kanal unatrag	
-		}
-
-
-		bsp_DelayUS(100000);	
-		
-		while(DRDY_IS_LOW()){  // postavke za kanal 2; plus citanje
-			//ADS1256_WriteReg(REG_MUX, (4 << 4) | 5);
-			CS_0();
-			ADS1256_Send8Bit(CMD_WREG | REG_MUX);	//Write command register 
-			ADS1256_Send8Bit(0x00);		//Write the register number 
-
-			ADS1256_Send8Bit(0x23);	//
-			bsp_DelayUS(5);
-
-			//ADS1256_WriteCmd(CMD_SYNC);
-			ADS1256_Send8Bit(CMD_SYNC);
-			bsp_DelayUS(5);
-
-			//ADS1256_WriteCmd(CMD_WAKEUP);
-			ADS1256_Send8Bit(CMD_WAKEUP);
-			bsp_DelayUS(25);
-			CS_1();
-	kanal1=ADS1256_ReadData();			//cita se jedan kanal unatrag
-		}
-
-
-		printf("%ld;%ld\n", kanal1,kanal2);
-
-		fprintf(fp,"%ld;%ld\n", kanal1, kanal2);
-*/
-
-
 	}
 
     bcm2835_spi_end();
