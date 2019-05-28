@@ -846,7 +846,7 @@ void config(unsigned int *k){
 *	The return value:  NULL
 *********************************************************************************************************
 */
-unsigned int conf[3]={3,100,5*1000*1000} //sps, nsps, sleep time
+unsigned int conf[3]={3,100,5*1000*1000};//sps, nsps, sleep time
 
 
 int  main()
