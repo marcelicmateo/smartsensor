@@ -27,6 +27,7 @@ RPI_V2_GPIO_P1_05->RPI_GPIO_P1_05
 RPI_V2_GPIO_P1_13->RPI_GPIO_P1_13
 ::
 */
+#include <signal.h>
 
 #include <bcm2835.h>  
 #include <stdio.h>
@@ -34,7 +35,7 @@ RPI_V2_GPIO_P1_13->RPI_GPIO_P1_13
 #include <string.h>
 #include <math.h>
 #include <errno.h>
-#include<time.h>
+#include <time.h>
 
 //CS      -----   SPICS  
 //DIN     -----   MOSI
