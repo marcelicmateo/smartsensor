@@ -813,7 +813,7 @@ int z=0;
 
 void config(unsigned int *k){
 	FILE *f;
-	f=fopen("conf","rb");
+	f=fopen("/home/pi/smartsensor/adc_source/conf","rb");
 	fread(k, sizeof(unsigned int), 3, f);
 	k[2]=k[2]*1000;
 	printf("%d %d %d",k[0],k[1],k[2]);
@@ -915,9 +915,9 @@ while(1){
 	limit=conf[1]+1;
 	ADS1256_CfgADC(ADS1256_GAIN_1,conf[0]);
 	sleep=conf[2];
-	z=0;
 	kanal1 = (int32_t *) realloc(kanal1, sizeof(int32_t)*(limit));
 	kanal2 = (int32_t *) realloc(kanal2, sizeof(int32_t)*(limit));
+	z=0;
 }
 
 	for(i=0;i<limit;i++){
