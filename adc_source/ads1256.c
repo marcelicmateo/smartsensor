@@ -851,7 +851,7 @@ void catch_sigusr1()
 
 int  main()
 {
-    	uint8_t id,i,j;
+    	uint32_t id,i,j;
 	int32_t *kanal1;
 	int32_t *kanal2;
   	int32_t adc[8];
@@ -861,7 +861,7 @@ int  main()
 	uint8_t buf[3];
 	//unsigned int conf[3]={3,100,5*1000*1000} //sps, nsps, sleep time
 	FILE *k1,*k2;
-	uint8_t limit=conf[1]+1;
+	uint32_t limit=conf[1]+1;
 	uint32_t sleep=conf[2];
  
     clock_t start, end;

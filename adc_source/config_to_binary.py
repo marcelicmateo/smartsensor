@@ -10,14 +10,14 @@ s=sys.argv[1]
 
 k=s.split('_')
 
-print(bytes([int(k[2])]))
+
 sps=ctypes.c_uint(int(k[1]))
 nsps=ctypes.c_uint(int(k[2]))
 sleep=ctypes.c_uint(int(k[3]))
 k=[sps,nsps,sleep]
 
-print(type(sps))
-print(k)
+#print(type(sps))
+#print(k)
 fun = ctypes.CDLL("/home/pi/smartsensor/adc_source/libfun.so")
 #fun.c_dump.argtypes=[ctypes.c_uint]
 fun.c_dump(sps,nsps,sleep)

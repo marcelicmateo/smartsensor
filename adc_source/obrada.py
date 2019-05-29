@@ -11,7 +11,7 @@ num_of_char_to_read=8*100+100
 
 def obrada_kanala(fname):
     f=open(fname,"r")
-    s=f.read(num_of_char_to_read)
+    s=f.readline()
     f.close()
     
     kanal=s.split(';')
