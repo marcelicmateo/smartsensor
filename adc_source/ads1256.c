@@ -28,7 +28,7 @@ RPI_V2_GPIO_P1_13->RPI_GPIO_P1_13
 ::
 */
 #include <signal.h>
-
+#include <stdlib.h>
 #include <bcm2835.h>  
 #include <stdio.h>
 #include <unistd.h>
@@ -809,19 +809,23 @@ uint16_t Voltage_Convert(float Vref, float voltage)
 
 
 unsigned int conf[3]={3,100,5*1000*1000};//sps, nsps, sleep time
+int z=0;
 
 void config(unsigned int *k){
 	FILE *f;
 	f=fopen("conf","rb");
 	fread(k, sizeof(unsigned int), 3, f);
+	k[2]=k[2]*1000;
+	printf("%d %d %d",k[0],k[1],k[2]);
 	fclose(f);
 	return 0;
 }
 
 void sig_usr1(int signum, siginfo_t *info, void *ptr)
 {
-   // config(conf);
+   config(conf);
 	printf("signal uhvacen\n");
+	z=1;
 
 }
 
@@ -847,9 +851,9 @@ void catch_sigusr1()
 
 int  main()
 {
-    uint8_t id,i,j;
-	int32_t kanal1[101];
-	int32_t kanal2[101];
+    	uint8_t id,i,j;
+	int32_t *kanal1;
+	int32_t *kanal2;
   	int32_t adc[8];
 	int32_t volt[8];
 	uint8_t ch_num;
@@ -857,11 +861,16 @@ int  main()
 	uint8_t buf[3];
 	//unsigned int conf[3]={3,100,5*1000*1000} //sps, nsps, sleep time
 	FILE *k1,*k2;
+	uint8_t limit=conf[1]+1;
+	uint32_t sleep=conf[2];
  
     clock_t start, end;
     double cpu_time_used;
 
 	catch_sigusr1();
+
+	kanal1=(int32_t *)malloc(sizeof(int32_t)*limit);
+	kanal2=(int32_t *)malloc(sizeof(int32_t)*limit);
 
 	if (!bcm2835_init())
         return 1;
@@ -902,7 +911,16 @@ int  main()
 printf("this is\n");
 while(1){
 	printf("sparta1\n");
-	for(i=0;i<(conf[1]+1);i++){
+	if (z){
+	limit=conf[1]+1;
+	ADS1256_CfgADC(ADS1256_GAIN_1,conf[0]);
+	sleep=conf[2];
+	z=0;
+	kanal1 = (int32_t *) realloc(kanal1, sizeof(int32_t)*(limit));
+	kanal2 = (int32_t *) realloc(kanal2, sizeof(int32_t)*(limit));
+}
+
+	for(i=0;i<limit;i++){
 
 		while(DRDY_IS_LOW());
 		ADS1256_WriteReg(REG_MUX, 0x01);
@@ -936,11 +954,11 @@ while(1){
 
 		k1=fopen("kanal1","w+");
 		k2=fopen("kanal2","w+");
-		for(i=0;i<100;i++){ fprintf(k1,"%08ld;",kanal1[i+1]); fprintf(k2,"%08ld;",kanal2[i+1]); }
+		for(i=0;i<limit-1;i++){ fprintf(k1,"%08ld;",kanal1[i+1]); fprintf(k2,"%08ld;",kanal2[i+1]); }
 		fprintf(k1,"\n"); fprintf(k2,"\n");
 		fclose(k1); fclose(k2);
 
-		bsp_DelayUS(conf[2]);
+		bsp_DelayUS(sleep);
 		bcm2835_gpio_write(POWERPIN,HIGH); //upali napajanje
 		bsp_DelayUS(47000);
 	}
