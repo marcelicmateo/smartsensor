@@ -952,8 +952,8 @@ while(1){
 
 		printf("sparta2\n");
 
-		k1=fopen("kanal1","w+");
-		k2=fopen("kanal2","w+");
+		k1=fopen("/home/pi/smartsensor/adc_source/kanal1","w+");
+		k2=fopen("/home/pi/smartsensor/adc_source/kanal2","w+");
 		for(i=0;i<limit-1;i++){ fprintf(k1,"%08ld;",kanal1[i+1]); fprintf(k2,"%08ld;",kanal2[i+1]); }
 		fprintf(k1,"\n"); fprintf(k2,"\n");
 		fclose(k1); fclose(k2);

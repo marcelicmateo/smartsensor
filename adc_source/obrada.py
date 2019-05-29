@@ -36,8 +36,8 @@ def obrada_kanala(fname):
 
     
     
-kanal1=obrada_kanala('kanal1')
-kanal2=obrada_kanala('kanal2')
+kanal1=obrada_kanala('/home/pi/smartsensor/adc_source/kanal1')
+kanal2=obrada_kanala('/home/pi/smartsensor/adc_source/kanal2')
 
 rs=10000
 srs=rs*0.01         #devijacija otpora shunta
@@ -69,13 +69,19 @@ log={"timestamp": st,
      "U_ntc_std":kanal2[2],
      "otpor_ntc":rntc,
      "devijacija_ntc":s,
-     "tempratura_celzij":temperatura
+     "temperatura":temperatura
      }
 
 y=json.dumps(log)   #log in to file
 #print("%s\n" % y)
 f.write("%s\n" % y)
 f.close()
+
+f=open("/home/pi/mqtt_out","w+")
+f.write("%s\n" %y)
+f.close
+
+
 
 
 
