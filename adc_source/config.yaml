@@ -1,32 +1,35 @@
-﻿editor: MateoM
-date: 2019/06/06
+editor: MateoM
+date: 2019/06/07
+ver: 1.1
 device: smartsensor
-resistor: ID vishay
+resistor: 
+  id: ID vishay
   resistance: 22000
   tolerance: 5
   betta: 3740
   bettaTolerance: 2
-shunt: ID shunt
+shunt: 
+  id: ID shunt
   resistance: 10000
   tolerance: 1
-adc: ads1256
-  sps: 
-   - 30000
-   - 15000
-   - 75000
-   - 3750
-   - 2000
-   - 1000
-   - 500
-   - 100
-   - 60
-   - 50
-   - 30
-   - 25
-   - 15
-   - 10
-   - 5
-   - 2.5
+adc:
+  id: ads1256
+  sps:
+#    - "30000":"0"
+#    - "15000":"1"
+#    - "75000":"2"
+    - 3750: &def_sps 3  #default value
+    - 2000: 4
+    - 1000: 5
+    - 500: 6
+    - 100: 7
+    - 50: 9
+    - 30: 10
+    - 25: 11
+    - 15: 12
+    - 10: 13
+    - 5: 14
+    - 2.5: 15
   zeff:
     - 10000000
     - 10000000
@@ -45,13 +48,18 @@ adc: ads1256
     - 80000000
     - 80000000
   fclkin: 768000000
-  refVoltage: ID zener
+  refVoltage:
+    id: "ID zener"
     voltage: 2.5
-    tolerance:
-aquisition: 
-    numberOfsps: 100
-    sleepTime: 5
-powerSource: kinez
+    #tolerance:
+aquisition:
+    numberOfsps: &def_nsps 1000 #default value 
+    sleepTime: &def_sleep 5000  #default value
+powerSource:
   voltage: 3.3
-  maxCurrent:
+  #maxCurrent:
   settlingtime: 47000e-6
+default:
+  sps: *def_sps
+  nsps: *def_nsps
+  sleep: *def_sleep

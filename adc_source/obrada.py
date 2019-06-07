@@ -67,7 +67,7 @@ s=math.sqrt(Untc**2+Urshunt**2+Ushunt**2)       #devijacija otpora ntca
 
 temperatura=(math.log(rntc/22000)/3740 + 1/(25+273.15))**(-1)-273.15
 
-print(temperatura) 
+#print(temperatura) 
 
 
 
@@ -85,7 +85,7 @@ log={"timestamp": st,
      }
 
 y=json.dumps(log)   #log in to file
-#print("%s\n" % y)
+print("%s\n" % y)
 f.write("%s\n" % y)
 f.close()
 
