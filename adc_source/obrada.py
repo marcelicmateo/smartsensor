@@ -4,38 +4,50 @@ import numpy
 import json
 import math
 
+
+
 st = datetime.datetime.utcnow().strftime('%Y-%m-%d_%H:%M:%S:%f')
 num_of_char_to_read=8*100+100
 
+f=open("/home/pi/smartsensor/adc_source/confpy","r")
+c=f.readline()
+#print(c)
+c=c.split('_')
+nsps=c[2]
+sps=c[1]
 
 
+
+nsps=int(nsps)
+sps=int(sps)
+
+#print(nsps, sps)
 def obrada_kanala(fname):
     f=open(fname,"r")
     s=f.readline()
     f.close()
-    
+
     kanal=s.split(';')
     kanal.pop() #izbacivanje zadnjeg prazng karactera
-    
-    
-        
-    k=[]  
+
+
+
+    k=[]
     #prebacivanje stringa u integer
     for x in kanal:
         k.append(int(x))
-        
+
     k_mean=numpy.mean(k)
     k_std=numpy.std(k)
-    
-    
-    
+
+
+
     return([k, k_mean, k_std])
-    
-    
 
 
-    
-    
+
+
+
 kanal1=obrada_kanala('/home/pi/smartsensor/adc_source/kanal1')
 kanal2=obrada_kanala('/home/pi/smartsensor/adc_source/kanal2')
 
@@ -55,7 +67,7 @@ s=math.sqrt(Untc**2+Urshunt**2+Ushunt**2)       #devijacija otpora ntca
 
 temperatura=(math.log(rntc/22000)/3740 + 1/(25+273.15))**(-1)-273.15
 
-#print(temperatura) 
+print(temperatura) 
 
 
 

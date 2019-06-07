@@ -343,7 +343,7 @@ void ADS1256_CfgADC(ADS1256_GAIN_E _gain, ADS1256_DRATE_E _drate)
 			ACAL=1  enable  calibration
 		*/
 		//buf[0] = (0 << 3) | (1 << 2) | (1 << 1);//enable the internal buffer
-        buf[0] = (0 << 3) | (1 << 2) | (0 << 1);  // The internal buffer is prohibited
+        buf[0] = (0 << 3) | (1 << 2) | (1 << 1);  // The internal buffer enabled
 
         //ADS1256_WriteReg(REG_STATUS, (0 << 3) | (1 << 2) | (1 << 1));
 
