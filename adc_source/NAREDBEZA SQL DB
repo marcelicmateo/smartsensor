@@ -1,0 +1,26 @@
+CREATE TABLE adc_config (
+    conf_id INTEGER PRIMARY KEY DEFAULT 0,
+    samples_per_second TEXT DEFAULT 3750,
+    number_of_samples UNSIGNED SHORT INTEGER DEFAULT 100,
+    f_samples UNSIGNED SHORT INTEGER DEFAULT 5
+);
+insert into adc_def_config default values;
+
+
+CREATE TABLE adc_channels_raw (
+    raw_id INTEGER PRIMARY KEY,
+    conf_id integer REFERENCES adc_config (conf_id),
+    raw_data_ch1 TEXT,
+    raw_data_ch2 TEXT
+);
+
+
+CREATE TABLE adc_channels_raw (
+    raw_id INTEGER PRIMARY KEY,
+    conf_id integer REFERENCES adc_config (conf_id),
+    raw_data_ch1 TEXT,
+    raw_data_ch2 TEXT
+);
+
+
+
