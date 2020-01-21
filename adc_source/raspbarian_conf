@@ -1,0 +1,14 @@
+###
+20.1.2020.
+-------
+mounted /tmp/db to ram
+unutar /etc/fstab
+dodano na kraj 
+tmpfs /tmp/db tmpfs defaults,noatime,nosuid,size=100m 0 0
+###
+
+
+
+
+
+
