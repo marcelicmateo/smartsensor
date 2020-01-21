@@ -1,11 +1,17 @@
+####
+naradbe za inicijalno radjenje DATABASE koji se kloristi
+u progremima i kao data loger
+21.20.2020 MM
+#####
+
 CREATE TABLE adc_config (
     conf_id INTEGER PRIMARY KEY DEFAULT 0,
     samples_per_second TEXT DEFAULT 3750,
     number_of_samples UNSIGNED SHORT INTEGER DEFAULT 100,
     f_samples UNSIGNED SHORT INTEGER DEFAULT 5
 );
-insert into adc_def_config default values;
 
+insert into adc_def_config default values;
 
 CREATE TABLE adc_channels_raw (
     raw_id INTEGER PRIMARY KEY,
@@ -14,12 +20,19 @@ CREATE TABLE adc_channels_raw (
     raw_data_ch2 TEXT
 );
 
-
-CREATE TABLE adc_channels_raw (
-    raw_id INTEGER PRIMARY KEY,
+CREATE TABLE calculated_data (
+    data_id INTEGER PRIMARY KEY,
     conf_id integer REFERENCES adc_config (conf_id),
-    raw_data_ch1 TEXT,
-    raw_data_ch2 TEXT
+    raw_id REFERENCES adc_channels_raw(raw_id),
+    timestamp TEXT,
+    voltage_ch1_mean UNSIGNED double,
+    voltage_ch1_std  UNSIGNED double,
+    voltage_ch2_mean UNSIGNED double,
+    voltage_ch2_std  UNSIGNED double,
+    resistance      UNSIGNED double,
+    resistance_std UNSIGNED double,
+    temperature UNSIGNED double,
+    temperature_std UNSIGNED double
 );
 
 
