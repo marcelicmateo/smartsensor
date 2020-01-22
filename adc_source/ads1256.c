@@ -12,7 +12,7 @@
 //default values for 1st boot up
 #define DEF_PERIOD  5*1000*1000     // [us] 5 seconds, frequency of taking samples
 #define DEF_SPS     ADS1256_3750SPS // sps speed
-#define DEF_NS      100             // number of samples
+#define DEF_NS   100             // number of samples
 
 
 int z=0;
@@ -27,26 +27,26 @@ void config(unsigned int *k){
 	return 0;
 }
 
-void sig_usr1(int signum, siginfo_t *info, void *ptr)
-{
-    config(conf);
-	printf("signal uhvacen\n");
-	z=1;
-
-}
-
-void catch_sigusr1()
-{
-    static struct sigaction _sigact;
-
-    memset(&_sigact, 0, sizeof(_sigact));
-    _sigact.sa_sigaction = sig_usr1;
-    _sigact.sa_flags = SA_SIGINFO;
-
-    sigaction(SIGUSR1, &_sigact, NULL);
-}
-/*
-*********************************************************************************************************
+//void sig_usr1(int signum, siginfo_t *info, void *ptr)
+//{
+//    config(conf);
+//	printf("signal uhvacen\n");
+//	z=1;
+//
+////}
+//
+//void catch_sigusr1()
+//{
+//    static struct sigaction _sigact;
+//
+//    memset(&_sigact, 0, sizeof(_sigact));
+//    _sigact.sa_sigaction = sig_usr1;
+//    _sigact.sa_flags = SA_SIGINFO;
+//
+//    sigaction(SIGUSR1, &_sigact, NULL);
+//}
+///*
+/*********************************************************************************************************
 *	name: main
 *	function:  
 *	parameter: NULL
@@ -55,7 +55,7 @@ void catch_sigusr1()
 */
 
 
-int  main()
+int  * main(void)
 {
     uint32_t id,i,j;
 	int32_t *kanal1;
@@ -66,13 +66,13 @@ int  main()
 	int32_t kanal[100];
 	uint8_t buf[3];
 	FILE *k1,*k2;
-	uint32_t limit=conf[1]+1;
-	uint32_t sleep=conf[2];
+	uint32_t limit=DEF_NS+1;
+	uint32_t sleep=DEF_PERIOD;
  
     clock_t start, end;
     double cpu_time_used;
 
-	catch_sigusr1();
+//	catch_sigusr1();
 
 	kanal1=(int32_t *)malloc(sizeof(int32_t)*limit);
 	kanal2=(int32_t *)malloc(sizeof(int32_t)*limit);
@@ -104,7 +104,7 @@ int  main()
 	{
 		printf("Ok, ASD1256 Chip ID = 0x%d\r\n", (int)id);
 	}
-  	ADS1256_CfgADC(ADS1256_GAIN_1, conf[0]);
+  	ADS1256_CfgADC(ADS1256_GAIN_1, DEF_SPS);
         ADS1256_StartScan(1);
 	ch_num = 2;
 	//if (ADS1256_Scan() == 0)
@@ -114,12 +114,12 @@ int  main()
 
 
 printf("this is\n");
-while(1){
+
 	printf("sparta1\n");
 	if (z){
-	limit=conf[1]+1;
-	ADS1256_CfgADC(ADS1256_GAIN_1,conf[0]);
-	sleep=conf[2];
+	limit= DEF_NS +1;
+	ADS1256_CfgADC(ADS1256_GAIN_1,3);
+	sleep=DEF_PERIOD;
 	kanal1 = (int32_t *) realloc(kanal1, sizeof(int32_t)*(limit));
 	kanal2 = (int32_t *) realloc(kanal2, sizeof(int32_t)*(limit));
 	z=0;
@@ -163,13 +163,13 @@ while(1){
 		fprintf(k1,"\n"); fprintf(k2,"\n");
 		fclose(k1); fclose(k2);
 
-		bsp_DelayUS(sleep);
-		bcm2835_gpio_write(POWERPIN,HIGH); //upali napajanje
-		bsp_DelayUS(47000);
-	}
+		//bsp_DelayUS(sleep);
+		//bcm2835_gpio_write(POWERPIN,HIGH); //upali napajanje
+		//bsp_DelayUS(47000);
+	
 
     bcm2835_spi_end();
     bcm2835_close();
 
-    return 0;
+    return kanal1;
 }
