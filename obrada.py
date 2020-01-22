@@ -1,44 +1,9 @@
 import datetime 
 import numpy
 #from matplotlib import pyplot
-import json
-from yaml import load 
-
-
-path_to_wrdir='/home/pi/smartsensor/adc_source/'
-path_to_kanal1=path_to_wrdir+'kanal1'
-path_to_kanal2=path_to_wrdir+'kanal2'
-config_file=path_to_wrdir+'config_def.yaml'
-path_to_config_py=path_to_wrdir+'config.py'
-
-def obrada_kanala(fname):
-    with open(fname,'r') as f:
-        s=f.read()
-    kanal=s.split(';')
-    kanal.pop() #izbacivanje zadnjeg prazng karactera
-    k=list(map(int, kanal))
-    
-    k_mean=numpy.mean(k,dtype=numpy.float64)
-    k_std=numpy.std(k, dtype=numpy.float64,ddof=1)    
-    return([k, k_mean, k_std])
+st = datetime.datetime.utcnow().strftime('%Y-%m-%d_%H:%M:%S:%f')    
 
 def obrada():
-    st = datetime.datetime.utcnow().strftime('%Y-%m-%d_%H:%M:%S:%f')
-    [kanal1, u_ntc, u_ntc_std]=obrada_kanala(path_to_kanal1)
-    [kanal2, u_shunt, u_shunt_std]=obrada_kanala(path_to_kanal2)
-    #ucitavvanje stvari
-    with open(config_file,'r') as f:
-        config=load(f)
-    
-#    with open('config.py','r') as f:
-#        sps=f.readline()
-#        nsps=f.readline()
-#        
-    sps=3
-    zeff=config.get('adc').get('zeff')[sps]
-    
-    
-    
     r_ntc_25                =config.get('resistor').get('resistance')
     r_ntc_tolerance         =config.get('resistor').get('tolerance')
     r_ntc_betta             =config.get('resistor').get('betta')
@@ -47,9 +12,6 @@ def obrada():
     r_shunt                 =config.get('shunt').get('resistance')
     r_shunt_tolerance       =config.get('shunt').get('tolerance')
 
-
-  
-    
     r                       =numpy.divide(kanal1,kanal2)  
     r_mean                  =numpy.mean(r, dtype=numpy.float64)
     r_std                   =numpy.std(r,dtype=numpy.float64,ddof=1)
@@ -90,10 +52,6 @@ def obrada():
                             D1*numpy.log(r_ntc/r_ntc_25)**3   \
                         )**-1 - 273.15
     
-    
-
-
-
     f=open("data_log.txt","a+")
     log={"timestamp": st,
         "U_ntc_raw":kanal1,
@@ -114,10 +72,6 @@ def obrada():
     print("%s\n" % y)
     f.write("%s\n" % y)
     f.close()
-
-    f=open("mqtt_out","w+")
-    f.write("%s\n" %y)
-    f.close
 
     return(0)
 
