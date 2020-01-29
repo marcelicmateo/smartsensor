@@ -1,0 +1,60 @@
+editor: MateoM
+date: 2019/06/06
+device: smartsensor
+resistor: 
+  id: ID vishay
+  resistance: 22000
+  tolerance: 5
+  betta: 3740
+  bettaTolerance: 2
+shunt: 
+  id: ID shunt
+  resistance: 10000
+  tolerance: 1
+adc: 
+  sps:
+    - 30000
+    - 15000
+    - 75000
+    - 3750
+    - 2000
+    - 1000
+    - 500
+    - 100
+    - 60
+    - 50
+    - 30
+    - 25
+    - 15
+    - 10
+    - 5
+    - 2.5
+  zeff:
+    - 10000000
+    - 10000000
+    - 10000000
+    - 10000000
+    - 10000000
+    - 20000000
+    - 40000000
+    - 40000000
+    - 40000000
+    - 80000000
+    - 80000000
+    - 80000000
+    - 80000000
+    - 80000000
+    - 80000000
+    - 80000000
+  fclkin: 768000000
+  refVoltage: 
+    voltage: 2.5
+    #tolerance:
+aquisition:
+    numberOfsps: 100
+    sleepTime: 5
+powerSource:
+  voltage: 3.3
+  #maxCurrent:
+  settlingtime: 47000e-6
+

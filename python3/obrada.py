@@ -1,9 +1,12 @@
 import datetime 
 import numpy
-#from matplotlib import pyplot
-st = datetime.datetime.utcnow().strftime('%Y-%m-%d_%H:%M:%S:%f')    
+import json
 
-def obrada():
+
+def obrada(config, kanali):
+    st = datetime.datetime.utcnow().strftime('%Y-%m-%d_%H:%M:%S:%f')    
+    sps=3
+    zeff=config.get('adc').get('zeff')[sps] 
     r_ntc_25                =config.get('resistor').get('resistance')
     r_ntc_tolerance         =config.get('resistor').get('tolerance')
     r_ntc_betta             =config.get('resistor').get('betta')
@@ -12,7 +15,7 @@ def obrada():
     r_shunt                 =config.get('shunt').get('resistance')
     r_shunt_tolerance       =config.get('shunt').get('tolerance')
 
-    r                       =numpy.divide(kanal1,kanal2)  
+    r                       =numpy.divide(kanali[0],kanali[1])  
     r_mean                  =numpy.mean(r, dtype=numpy.float64)
     r_std                   =numpy.std(r,dtype=numpy.float64,ddof=1)
         
@@ -52,14 +55,25 @@ def obrada():
                             D1*numpy.log(r_ntc/r_ntc_25)**3   \
                         )**-1 - 273.15
     
-    f=open("data_log.txt","a+")
+
+    U_ntc_mean=numpy.mean(kanali[0],dtype=numpy.float64)
+    U_ntc_std=numpy.std(kanali[0], dtype=numpy.float64,ddof=1)    
+    U_shunt_mean=numpy.mean(kanali[1],dtype=numpy.float64)
+    U_shunt_std=numpy.std(kanali[1], dtype=numpy.float64,ddof=1)  
+    U_ntc_m_v, U_ntc_s_v, U_shunt_m_v, U_shunt_s_v = \
+        map(lambda x: x * 5 /(0x7fffff)\  #0x7fffff je 2**23 -1 
+            ,[U_ntc_mean, U_ntc_std, U_shunt_mean, U_shunt_std])  
     log={"timestamp": st,
-        "U_ntc_raw":kanal1,
-        "U_ntc_mean":u_ntc,
-        "U_ntc_std":u_ntc_std,
-        "U_shunt_raw":kanal2,
-        "U_shunt_mean":u_shunt,
-        "U_shunt_std":u_shunt_std,
+        "U_ntc_raw":kanali[0],
+        "U_ntc_mean":U_ntc_mean,
+        "U_ntc_m_v" : U_ntc_m_v,
+        " U_ntc_s_v" : U_ntc_s_v, 
+        "U_shunt_m_v" : U_shunt_m_v,
+        "U_shunt_s_v"  : U_shunt_s_v,
+        "U_ntc_std":U_ntc_std,
+        "U_shunt_raw":kanali[1],
+        "U_shunt_mean":U_shunt_mean,
+        "U_shunt_std":U_shunt_std,
         "otpor_ntc":r_ntc,
         "std_NTC":r_ntc_std,
         "utjecaj_shunta_us":uncertanty_shunt_tolerance,
@@ -68,12 +82,9 @@ def obrada():
         "temperatura":temperatura
         }
 
-    y=json.dumps(log)   #log in to file
-    print("%s\n" % y)
-    f.write("%s\n" % y)
-    f.close()
-
-    return(0)
+    print("%s\n" % log)
+  
+    return(log)
 
 if __name__ == "__main__":
     obrada()

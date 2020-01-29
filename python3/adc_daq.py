@@ -4,7 +4,7 @@
 import time
 import ADS1256
 import RPi.GPIO as GPIO
-from numpy import zeros, int32
+from numpy import zeros, int32, mean
 
 def adc_daq(number_of_samples, sps):
     ADC = ADS1256.ADS1256()
@@ -22,6 +22,6 @@ def adc_daq(number_of_samples, sps):
 
 if __name__ == "__main__":
     c=adc_daq(100,'ADS1256_3750SPS')
-    print(c)
+    print(mean(c[0])*5.0/0x7fffff)
     pass
     
