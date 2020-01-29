@@ -10,5 +10,15 @@ tmpfs /tmp/db tmpfs defaults,noatime,nosuid,size=100m 0 0
 
 
 
+###
 
+29.1.2020
+------------
+sudo pip3 install uwsgi 
+
+i pokrenut sa
+
+sudo uwsgi --plugin python,http --http=192.168.5.27:8080 --master --module web_app:server --processes 2
+
+u direktoriju di je web_app
 
