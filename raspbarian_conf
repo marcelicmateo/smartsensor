@@ -22,3 +22,9 @@ sudo uwsgi --plugin python,http --http=192.168.5.27:8080 --master --module web_a
 
 u direktoriju di je web_app
 
+http://192.168.5.27:8080/
+adresa na kojoj se pokrene
+####
+
+
+
