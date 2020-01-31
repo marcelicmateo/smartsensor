@@ -3,10 +3,10 @@ import numpy
 import json
 
 
-def obrada(config, kanali):
+def obrada(config, kanali, sps = 'ADS1256_3750SPS'):
     st = datetime.datetime.utcnow().strftime('%Y-%m-%d_%H:%M:%S:%f')    
-    sps=3
-    zeff=config.get('adc').get('zeff')[sps] 
+
+    zeff=config.get('adc').get('sps_and_zeff').get('ADS1256_3750SPS')
     r_ntc_25                =config.get('resistor').get('resistance')
     r_ntc_tolerance         =config.get('resistor').get('tolerance')
     r_ntc_betta             =config.get('resistor').get('betta')
@@ -48,6 +48,7 @@ def obrada(config, kanali):
     B1=2.744032e-4
     C1=3.666944e-6
     D1=1.375492e-7
+
     temperatura         =                                     \
                         (   A1                              + \
                             B1*numpy.log(r_ntc/r_ntc_25)    + \
@@ -61,8 +62,7 @@ def obrada(config, kanali):
     U_shunt_mean=numpy.mean(kanali[1],dtype=numpy.float64)
     U_shunt_std=numpy.std(kanali[1], dtype=numpy.float64,ddof=1)  
     U_ntc_m_v, U_ntc_s_v, U_shunt_m_v, U_shunt_s_v = \
-        map(lambda x: x * 5 /(0x7fffff)\  #0x7fffff je 2**23 -1 
-            ,[U_ntc_mean, U_ntc_std, U_shunt_mean, U_shunt_std])  
+        map(lambda x: x * 5 /(0x7fffff),[U_ntc_mean, U_ntc_std, U_shunt_mean, U_shunt_std])  
     log={"timestamp": st,
         "U_ntc_raw":kanali[0],
         "U_ntc_mean":U_ntc_mean,
@@ -82,7 +82,7 @@ def obrada(config, kanali):
         "temperatura":temperatura
         }
 
-    print("%s\n" % log)
+   # print("%s\n" % log)
   
     return(log)
 

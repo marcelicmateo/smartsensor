@@ -114,7 +114,7 @@ class ADS1256:
         return id
         
     #The configuration parameters of ADC, gain and data rate
-    def ADS1256_ConfigADC(self, gain, drate):
+    def ADS1256_ConfigADC(self, gain = ADS1256_GAIN_E.get('ADS1256_GAIN_1'), drate = ADS1256_DRATE_E.get('ADS1256_30000SPS')):
         self.ADS1256_WaitDRDY()
         buf = [0,0,0,0,0,0,0,0]
         buf[0] = (0<<3) | (1<<2) | (0<<1)
@@ -128,6 +128,7 @@ class ADS1256:
         
         config.digital_write(self.cs_pin, GPIO.HIGH)#cs 1
         config.delay_ms(1) 
+        return 0
 
 
 
@@ -159,7 +160,6 @@ class ADS1256:
         else:
             print("ID Read failed   ")
             return -1
-        self.ADS1256_ConfigADC(ADS1256_GAIN_E['ADS1256_GAIN_1'], ADS1256_DRATE_E['ADS1256_30000SPS'])
         return 0
         
     def ADS1256_Read_ADC_Data(self):
