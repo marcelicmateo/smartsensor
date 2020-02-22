@@ -1,3 +1,4 @@
-./.vscode
-./*.pyc
-./__pycache__
+.vscode
+**.pyc
+__pycache__
+python3/__pycache__
