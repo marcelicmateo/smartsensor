@@ -26,5 +26,13 @@ http://192.168.5.27:8080/
 adresa na kojoj se pokrene
 ####
 
+#####
+22.02.2020.
+----------------------
+napravljena setup.sh skripta
+bash skripta za napraviti py environmet
 
+source setup.sh
+
+###
 
