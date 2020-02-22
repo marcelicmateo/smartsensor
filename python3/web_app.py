@@ -38,7 +38,9 @@ def generate_dropdown_dictionary_VALUE_EQ_KEYS(dictionary):
 
 app.layout=html.Div(children=[
     html.H1('Wellkome'),
-    html.Div(children=[
+    dcc.Tabs(id='tabs', children=[
+        dcc.Tab(label='Mjerni krug', children=[
+        html.Div(children=[
             html.H2('Vrijednosti mejernog kruga')
             ,html.Table(id='default_values_resistance',children=[
                 html.Thead(html.Tr([
@@ -46,7 +48,7 @@ app.layout=html.Div(children=[
                     ,html.Td(u"Otpror [\u03A9]")
                     ,html.Td("tolerancija [%]")
                     ,html.Td("Betta faktor [K]")
-                    ,html.Td("Betta Tolerancija")
+                    ,html.Td("Betta Tolerancija [%]")
                 ]))
                 ,html.Tr([
                     html.Td("Ntc")
@@ -67,7 +69,7 @@ app.layout=html.Div(children=[
                     ,html.Td("3.3 V")
                 ])
             ])
-    ])
+        ]) #end div with tables
             ,html.Label(['Sampling speed of adc'
                 ,dcc.Dropdown(
                     id='sps'
@@ -90,9 +92,12 @@ app.layout=html.Div(children=[
             ,html.Button(id='start-button', n_clicks=0, children="start")
             ,dcc.Graph(id='output-state')
             ,html.Table(id='calculated_values')
-    ], 
+    ])#end tab 1
+    ,dcc.Tab(label='vrijednosti komponenti', children=[html.H1('kek')])
+    ])#end tabs
+    ], #end 1 div children
     id='raw'
-)
+)# end app
 
 # graf raw values of ntc and shunt
 @app.callback([Output('output-state', 'figure')
