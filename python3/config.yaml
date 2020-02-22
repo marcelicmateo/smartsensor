@@ -33,9 +33,6 @@ adc:
   refVoltage: 
     voltage: 2.5
     #tolerance:
-aquisition:
-    numberOfsps: 100
-    sleepTime: 5
 powerSource:
   voltage: 3.3
   #maxCurrent:

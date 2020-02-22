@@ -6,7 +6,7 @@ import json
 def obrada(config, kanali, sps = 'ADS1256_3750SPS'):
     st = datetime.datetime.utcnow().strftime('%Y-%m-%d_%H:%M:%S:%f')    
 
-    zeff=config.get('adc').get('sps_and_zeff').get('ADS1256_3750SPS')
+    zeff=config.get('adc').get('sps_and_zeff').get(sps)
     r_ntc_25                =config.get('resistor').get('resistance')
     r_ntc_tolerance         =config.get('resistor').get('tolerance')
     r_ntc_betta             =config.get('resistor').get('betta')
