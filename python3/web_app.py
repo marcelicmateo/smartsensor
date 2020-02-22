@@ -66,9 +66,9 @@ app.layout=html.Div(children=[
     )
 ])
 
-@app.callback([Output('output-state', 'figure'),
-            Output('calculated_values', 'children')],
-      [Input('start-button', 'n_clicks')]
+@app.callback([Output('output-state', 'figure')
+            ,Output('calculated_values', 'children')]
+      ,[Input('start-button', 'n_clicks')]
       ,[State('number_of_samples', 'value')
       ,State('sps', 'value')])
 def update_output(n_clicks, number_of_samples, sps):

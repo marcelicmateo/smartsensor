@@ -64,14 +64,14 @@ def obrada(config, kanali, sps = 'ADS1256_3750SPS'):
     U_ntc_m_v, U_ntc_s_v, U_shunt_m_v, U_shunt_s_v = \
         map(lambda x: x * 5 /(0x7fffff),[U_ntc_mean, U_ntc_std, U_shunt_mean, U_shunt_std])  
     log={"timestamp": st,
-        "U_ntc_raw":kanali[0],
+        #"U_ntc_raw":kanali[0],
         "U_ntc_mean":U_ntc_mean,
         "U_ntc_m_v" : U_ntc_m_v,
         " U_ntc_s_v" : U_ntc_s_v, 
         "U_shunt_m_v" : U_shunt_m_v,
         "U_shunt_s_v"  : U_shunt_s_v,
         "U_ntc_std":U_ntc_std,
-        "U_shunt_raw":kanali[1],
+        #"U_shunt_raw":kanali[1],
         "U_shunt_mean":U_shunt_mean,
         "U_shunt_std":U_shunt_std,
         "otpor_ntc":r_ntc,
