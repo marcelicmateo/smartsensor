@@ -12,10 +12,10 @@ import yaml
 from obrada import obrada
 from numpy import divide, max
 
-external_stylesheets = ["https://codepen.io/chriddyp/pen/bWLwgP.css"]
+#external_stylesheets = ["https://codepen.io/chriddyp/pen/bWLwgP.css"]
 
 
-app = dash.Dash(__name__,external_stylesheets=external_stylesheets)
+app = dash.Dash(__name__)
 server = app.server
 
 with open('config.yaml') as f:
@@ -45,11 +45,15 @@ app.layout=html.Div(children=[
                     html.Td(" ")
                     ,html.Td(u"Otpror [\u03A9]")
                     ,html.Td("tolerancija [%]")
+                    ,html.Td("Betta faktor [K]")
+                    ,html.Td("Betta Tolerancija")
                 ]))
                 ,html.Tr([
                     html.Td("Ntc")
                     ,html.Td(config.get('resistor').get('resistance'))
                     ,html.Td(config.get('resistor').get('tolerance'))
+                    ,html.Td(config.get('resistor').get('betta'))
+                    ,html.Td(config.get('resistor').get('bettaTolerance'))
                     ])
                 ,html.Tr([
                     html.Td("Shunt")
@@ -59,8 +63,7 @@ app.layout=html.Div(children=[
                 ])
             ,html.Table(id='napajanje', children=[
                 html.Tr([
-                    html.Td(" ")
-                    ,html.Td("Napajanje kruga")
+                    html.Td("Napajanje kruga")
                     ,html.Td("3.3 V")
                 ])
             ])
