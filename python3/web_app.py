@@ -11,6 +11,7 @@ import plotly.graph_objs as go
 import yaml
 from obrada import obrada
 from numpy import divide, max
+import json
 
 #external_stylesheets = ["https://codepen.io/chriddyp/pen/bWLwgP.css"]
 
@@ -34,7 +35,9 @@ def generate_dropdown_dictionary_VALUE_EQ_KEYS(dictionary):
         drop.append({'label' : key, 'value' : key})
     return drop
 
-
+def dict_to_markdown(dict):
+    c=json.dumps(dict)
+    return  c
 
 app.layout=html.Div(children=[
     html.H1('Wellkome'),
@@ -93,7 +96,15 @@ app.layout=html.Div(children=[
             ,dcc.Graph(id='output-state')
             ,html.Table(id='calculated_values')
     ])#end tab 1
-    ,dcc.Tab(label='vrijednosti komponenti', children=[html.H1('kek')])
+    ,dcc.Tab(label='vrijednosti komponenti', children=[
+        html.H2('vrijednosti komponeneti koristanih u mjernom lancu')
+        ,dcc.Markdown(id='vrijednosti_komponenti'
+            ,children=[
+                dict_to_markdown(config)
+            ])
+
+    ])#end of tab 2
+
     ])#end tabs
     ], #end 1 div children
     id='raw'
