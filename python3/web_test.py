@@ -13,14 +13,14 @@ with open('/home/mateo/smartsensor/python3/config.yaml') as f:
     config=yaml.safe_load(f)
 
 
-#generate table from dict format KEY : ITEM
+#generate table from yaml dictionary
 def generate_table(dic):
     html_table_return=[]
     for k,v in dic.items():
         if type(v) is dict:
-            html_table_return.append(html.Tr([html.Td("{}".format(k)),generate_table(v)]))
+            html_table_return.append(html.Tr([html.Td(style={'font-weight': 'bold', 'border-right' : 'double' ,  'vertical-align' : 'top'},children="{}".format(k)),generate_table(v)]))
         else:
-            html_table_return.append(html.Tr([html.Td("{}".format(k)), html.Td("{}".format(v))]))
+            html_table_return.append(html.Tr([html.Td(style={'font-weight': 'bold'},children="{}".format(k)), html.Td("{}".format(v))]))
     return html.Table(html_table_return)
 
 
