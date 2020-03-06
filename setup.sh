@@ -30,6 +30,7 @@ python3 -m venv $py_dir
 echo -e 'Activate env'
 source $WORK_DIR/$py_dir/bin/activate
 echo 'installing requirements.txt'
+pip3 install wheel #prvo instaliram wheel for pip kasnije
 pip3 install -r $WORK_DIR/requirements.txt
 echo 'Instaled, deactivating py env'
 deactivate
@@ -40,4 +41,8 @@ echo $py_dir >> .gitignore
 
 
 echo "DONE"
+
+echo "init Evn"
+source $WORK_DIR/$py_dir/bin/activate
+
 

@@ -12,7 +12,7 @@ shunt:
   resistance: 10000
   tolerance: 1
 adc: 
-  sps_and_zeff:
+  sps_zeff:
     { 'ADS1256_30000SPS' : 10000000, # reset the default values
     'ADS1256_15000SPS' : 10000000,
     'ADS1256_7500SPS' : 10000000,
@@ -31,9 +31,11 @@ adc:
     'ADS1256_2d5SPS' : 80000000 }
   fclkin: 768000000
   refVoltage: 
+    id: zenner
     voltage: 2.5
     #tolerance:
 powerSource:
+  id: kinez
   voltage: 3.3
   #maxCurrent:
   settlingtime: 47000e-6
