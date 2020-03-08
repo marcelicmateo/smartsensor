@@ -122,7 +122,9 @@ def update_output(n_clicks, number_of_samples, sps):
     else:
         k=get_adc_raw_values(number_of_samples=number_of_samples, sps=sps)
         #print(k)
-        i=obrada(config=config, kanali=k, sps=sps)
+        i=obrada(config={'resistor' : config.get('resistor'),'shunt':  config.get('shunt')}
+                , kanali=k
+                , zeff = config.get('adc').get('sps_and_zeff').get(sps))
         return {
             'data' : [ {
                 'y' : divide(k[0], max(k[0])) ,

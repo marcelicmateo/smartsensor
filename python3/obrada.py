@@ -2,10 +2,9 @@ import datetime
 import numpy
 
 
-def obrada(config, kanali, sps='ADS1256_3750SPS'):
+def obrada(config, kanali, zeff):
     st = datetime.datetime.utcnow().strftime('%Y-%m-%d_%H:%M:%S:%f')
 
-    zeff = config.get('adc').get('sps_and_zeff').get(sps)
     r_ntc_25 = config.get('resistor').get('resistance')
     r_ntc_tolerance = config.get('resistor').get('tolerance')
     r_ntc_betta = config.get('resistor').get('betta')
@@ -33,7 +32,7 @@ def obrada(config, kanali, sps='ADS1256_3750SPS'):
                                 ((r_shunt-1)*r_mean - zeff)**2 - \
                                 zeff*r_shunt/((r_mean-1)*r_shunt-zeff)
 
-    uncertanty_shunt_tolerance = r_shunt * r_shunt_tolerance * 0.01  #devijacija otpora shunta prema specifikaciji proizvodjaca
+    uncertanty_shunt_tolerance = r_shunt * r_shunt_tolerance * 0.01             #devijacija otpora shunta prema specifikaciji proizvodjaca
     uncertanty_betta_tolerance = r_ntc_betta * r_ntc_betta_tolerance * 0.01
 
     r_ntc_std                       =\
@@ -80,7 +79,6 @@ def obrada(config, kanali, sps='ADS1256_3750SPS'):
         "temperatura": temperatura
     }
 
-    # print("%s\n" % log)
 
     return (log)
 
