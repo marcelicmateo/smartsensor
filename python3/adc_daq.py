@@ -1,10 +1,9 @@
 #!/usr/bin/python3
 # -*- coding:utf-8 -*-
 
-import time
 import ADS1256
 import RPi.GPIO as GPIO
-from numpy import zeros, int32, mean
+from numpy import zeros, int32
 import obrada
 import yaml
 from tqdm import trange
@@ -30,5 +29,4 @@ if __name__ == "__main__":
         conf=yaml.safe_load(f)
     log=obrada.obrada(config=conf,kanali=c, sps='ADS1256_30000SPS')
     print(log)
-    pass
     

@@ -136,6 +136,7 @@ class ADS1256:
         if Channal > 7:
             return 0
         self.ADS1256_WriteReg(REG_E['REG_MUX'], (Channal<<4) | (1<<3))
+        return 0
 
     def ADS1256_SetDiffChannal(self, Channal):
         if Channal == 0:
