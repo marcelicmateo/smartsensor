@@ -12,6 +12,7 @@ import yaml
 from obrada import obrada
 from numpy import divide, max
 import json
+import dash_bootstrap_components as dbc
 
 #external_stylesheets = ["https://codepen.io/chriddyp/pen/bWLwgP.css"]
 
@@ -38,6 +39,74 @@ def generate_dropdown_dictionary_VALUE_EQ_KEYS(dictionary):
 def dict_to_markdown(dict):
     c=json.dumps(dict)
     return  c
+
+
+#generate table from yaml dictionary
+def generate_table(dic):
+    html_table_return=[]
+    for k,v in dic.items():
+        if type(v) is dict:
+            html_table_return.append(html.Tr([html.Td(style={'font-weight': 'bold', 'border-right' : 'double' ,  'vertical-align' : 'top'},children="{}".format(k)),generate_table(v)]))
+        else:
+            html_table_return.append(html.Tr([html.Td(style={'font-weight': 'bold'},children="{}".format(k)), html.Td("{}".format(v))]))
+    return html.Table(html_table_return)
+
+def generate_button_inputs():
+    return [ html.Label(['NTC RESISTANCE',dcc.Input(
+                    id='input_ntc_resistance'
+                    ,value = config.get('resistor').get('resistance')
+                    ,type = 'number'
+                    ,step = 1
+                    ,min = 1
+                    ,max = 50000
+                    ,debounce = True
+                    ,inputMode = "numeric"
+                    ,required = True
+            )]) ,html.Label(['NTC TOLERANCE',dcc.Input(
+                    id='input_ntc_resistance_tolerance'
+                    ,value = config.get('resistor').get('tolerance')
+                    ,type = 'number'
+                    ,step = 1
+                    ,min = 1
+                    ,max = 50000
+                    ,debounce = True
+                    ,inputMode = "numeric"
+                    ,required = True
+            )])  ,html.Label(['NTC BETTA',dcc.Input(
+                    id='input_ntc_betta'
+                    ,value = config.get('resistor').get('betta')
+                    ,type = 'number'
+                    ,step = 1
+                    ,min = 1
+                    ,max = 50000
+                    ,debounce = True
+                    ,inputMode = "numeric"
+                    ,required = True
+            )]) ,html.Label(['NTC BETTA TOLERANCE',dcc.Input(
+                    id='input_ntc_betta_tolerance'
+                    ,value = config.get('resistor').get('bettaTolerance')
+                    ,type = 'number'
+                    ,step = 1
+                    ,min = 1
+                    ,max = 50000
+                    ,debounce = True
+                    ,inputMode = "numeric"
+                    ,required = True
+            )]) ,html.Button(id='save_button', n_clicks=0, children="SAVE")
+            ]
+
+
+def tab2_tablica_komponenti():
+    return [
+    dcc.Markdown('''
+    ## Vrijednosti elemenata mjernog kruga
+    BLA BLA BLA, jebene tablice
+    ''')
+    ,dbc.Row([
+        dbc.Col(html.Div(id='component_table',style={'display': 'inline-block'},children=[generate_table(config)]))
+    , dbc.Col(html.Div(style={'display': 'inline-block', 'padding-left' : '4rem'},children=generate_button_inputs()))
+    ])]
+
 
 app.layout=html.Div(children=[
     html.H1('Wellkome'),
@@ -76,8 +145,8 @@ app.layout=html.Div(children=[
             ,html.Label(['Sampling speed of adc'
                 ,dcc.Dropdown(
                     id='sps'
-                    ,options = generate_dropdown_dictionary_VALUE_EQ_KEYS(config.get('adc').get('sps_and_zeff'))
-                    ,value = list(config.get('adc').get('sps_and_zeff').keys())[0]
+                    ,options = generate_dropdown_dictionary_VALUE_EQ_KEYS(config.get('adc').get('sps_zeff'))
+                    ,value = list(config.get('adc').get('sps_zeff').keys())[0]
                     ,clearable = False
                 )])
             ,html.Label(['numbers of samples to take'
@@ -97,12 +166,9 @@ app.layout=html.Div(children=[
             ,html.Table(id='calculated_values')
     ])#end tab 1
     ,dcc.Tab(label='vrijednosti komponenti', children=[
-        html.H2('vrijednosti komponeneti koristanih u mjernom lancu')
-        ,dcc.Markdown(id='vrijednosti_komponenti'
-            ,children=[
-                dict_to_markdown(config)
-            ])
-
+       html.Div(style={'display': 'inline-block'},children=
+    tab2_tablica_komponenti()
+    )
     ])#end of tab 2
 
     ])#end tabs
@@ -124,7 +190,7 @@ def update_output(n_clicks, number_of_samples, sps):
         #print(k)
         i=obrada(config={'resistor' : config.get('resistor'),'shunt':  config.get('shunt')}
                 , kanali=k
-                , zeff = config.get('adc').get('sps_and_zeff').get(sps))
+                , zeff = config.get('adc').get('sps_zeff').get(sps))
         return {
             'data' : [ {
                 'y' : divide(k[0], max(k[0])) ,
@@ -141,6 +207,23 @@ def update_output(n_clicks, number_of_samples, sps):
                 'yaxis' : {'title' : "voltage [V], in raw integer values"}
             }
         }, generate_table(i)
+
+
+@app.callback(  [Output('component_table', 'children') ]
+                ,[  Input('save_button', 'n_clicks')]
+                ,[  State('input_ntc_resistance' ,'value')
+                ,   State('input_ntc_resistance_tolerance', 'value')
+                ,   State('input_ntc_betta','value')    
+                ,   State('input_ntc_betta_tolerance','value')
+                ])
+def update_output(n_clicks,*args):
+    if n_clicks==0:
+        raise PreventUpdate
+    config['resistor']['resistance']=args[0]
+    config['resistor']['tolerance']=args[1]
+    config['resistor']['betta']=args[2]
+    config['resistor']['bettaTolerance']=args[3]
+    return [generate_table(config)]
 
 
 
