@@ -1,5 +1,6 @@
 import datetime
 import numpy
+from yaml import safe_load
 
 
 def obrada(config, kanali, zeff):
@@ -82,6 +83,11 @@ def obrada(config, kanali, zeff):
 
     return (log)
 
+def open_config(name):
+    with open(name, 'r') as f:
+        c=safe_load(f)
+    return c
+
 
 if __name__ == "__main__":
-    obrada()
+    obrada(open_config('config.yaml'),[[1,4],[2,6]], 10**6)
