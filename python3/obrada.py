@@ -13,14 +13,14 @@ def obrada(config, kanali, zeff):
 
     r_shunt = config.get('shunt').get('resistance')
     r_shunt_tolerance = config.get('shunt').get('tolerance')
+    temperatura_25=25+273.15
 
     r = numpy.divide(kanali[0], kanali[1])
     r_mean = numpy.mean(r, dtype=numpy.float64)
     r_std = numpy.std(r, dtype=numpy.float64, ddof=1)
 
-    #R_ntc=
+    #r_ntc=
     #{-Rs*Zeff*r/(Rs*r - Rs - Zeff)} r=Un/Us
-    #proracun u dropboxu, proracun temperature html
     r_ntc = -r_shunt * r_mean * zeff / (r_shunt * (r_mean - 1) - zeff)
 
     #utjecaj shunta i omjera napona na std od ntc
@@ -33,26 +33,33 @@ def obrada(config, kanali, zeff):
                                 ((r_shunt-1)*r_mean - zeff)**2 - \
                                 zeff*r_shunt/((r_mean-1)*r_shunt-zeff)
 
-    uncertanty_shunt_tolerance = r_shunt * r_shunt_tolerance * 0.01             #devijacija otpora shunta prema specifikaciji proizvodjaca
-    uncertanty_betta_tolerance = r_ntc_betta * r_ntc_betta_tolerance * 0.01
-
+    uncertanty_shunt_tolerance = numpy.divide(r_shunt * r_shunt_tolerance * 0.01, numpy.sqrt(3))             #devijacija otpora shunta prema specifikaciji proizvodjaca
+    uncertanty_betta_tolerance = numpy.divide(r_ntc_betta * r_ntc_betta_tolerance * 0.01, numpy.sqrt(3))
+    uncertanty_r_ntc_25 = numpy.divide(r_ntc_25 * r_ntc_tolerance * 0.01, numpy.sqrt(3))
+    #standardna devijacija ntc-a
     r_ntc_std                       =\
                 numpy.sqrt((r_ntc_std_rs*uncertanty_shunt_tolerance)**2 +\
                            (r_ntc_std_r**r_std) **2) #standardna devijacija ntc-a
 
     #aproksimacija temperature exp jednadzbom
-    #temperatura=(numpy.log(r_ntc/r_ntc_25)/r_ntc_betta + 1/(25+273.15))**(-1)-273.15
+    temperatura_e=(numpy.log(r_ntc/r_ntc_25)/r_ntc_betta + 1/(25+273.15))**(-1)-273.15
+    temperatura_e_std=temperatura_25**2*numpy.sqrt(r_ntc_betta**2*r_ntc_25**2*r_ntc_std**2 + r_ntc_betta**2*r_ntc**2*uncertanty_r_ntc_25**2 + r_ntc_25**2*r_ntc**2*uncertanty_betta_tolerance**2*numpy.log(r_ntc/r_ntc_25)**2)/(r_ntc_25*r_ntc*(r_ntc_betta + numpy.log((r_ntc/r_ntc_25)**temperatura_25))**2)
+
+    #aproksimacija temperature polinomom 3 reda
     A1 = 3.354016e-3
     B1 = 2.744032e-4
     C1 = 3.666944e-6
     D1 = 1.375492e-7
 
-    temperatura =                                             \
-                (A1                              + 
+    temperatura_polinom =   \
+                (A1                             + 
                 B1*numpy.log(r_ntc/r_ntc_25)    + 
                 C1*numpy.log(r_ntc/r_ntc_25)**2 + 
                 D1*numpy.log(r_ntc/r_ntc_25)**3   
                 )**-1 - 273.15
+
+    temperatura_polinom_std=numpy.sqrt(r_ntc_25**2*r_ntc_std **2 + r_ntc**2*uncertanty_r_ntc_25**2)*numpy.abs(B1 + 3*D1*numpy.log(r_ntc/r_ntc_25)**2 + numpy.log((r_ntc/r_ntc_25)**(2*C1)))/ \
+            (r_ntc_25*r_ntc*(A1 + C1*numpy.log(r_ntc/r_ntc_25)**2 + D1*numpy.log(r_ntc/r_ntc_25)**3 + numpy.log((r_ntc/r_ntc_25)**B1))**2)
 
     U_ntc_mean = numpy.mean(kanali[0], dtype=numpy.float64)
     U_ntc_std = numpy.std(kanali[0], dtype=numpy.float64, ddof=1)
@@ -77,7 +84,10 @@ def obrada(config, kanali, zeff):
         "utjecaj_shunta_us": uncertanty_shunt_tolerance,
         "utjecaj_omjera_napona_r": r_std,
         "omjer_namona_r_mean": r_mean,
-        "temperatura": temperatura
+        "temperatura_polinom": temperatura_polinom,
+        "temperatura_e" : temperatura_e,
+        'temperatura_polinom_std' : temperatura_polinom_std,
+        'temperatura_e_std':temperatura_e_std
     }
 
 
