@@ -16,8 +16,8 @@ import dash_bootstrap_components as dbc
 
 #external_stylesheets = ["https://codepen.io/chriddyp/pen/bWLwgP.css"]
 
-
-app = dash.Dash(__name__)
+app = dash.Dash(__name__,external_stylesheets=[dbc.themes.BOOTSTRAP])
+app.config['suppress_callback_exceptions']=True
 server = app.server
 
 with open('config.yaml') as f:
@@ -166,13 +166,33 @@ def tab1_mejerne_komponente():
 
 app.layout=html.Div(children=[
     html.H1('Wellkome'),
-    dcc.Tabs(id='tabs', children=[
-        dcc.Tab(label='Mjerni krug',tab_id='mjerni_krug', children=tab1_mejerne_komponente())                           #end tab 1
-        ,dcc.Tab(label='vrijednosti komponenti', tab_id='vrijednosti_komponenti', children=tab2_tablica_komponenti())    #end tab 2
+    dbc.Tabs(id='tabs', children=[
+        dbc.Tab(label='Mjerni krug',tab_id='mjerni_krug')                           #end tab 1
+        ,dbc.Tab(label='vrijednosti komponenti', tab_id='vrijednosti_komponenti')    #end tab 2
         ]
-        , active_tab="mjerni_krug",)
+        , active_tab="mjerni_krug")
     ,html.Div(id='tab_content')
     ])
+
+@app.callback(
+    Output('tab_content', 'children')
+    ,[Input("tabs", "active_tab")]
+)
+def render_tab_content(active_tab):
+    """
+    This callback takes the 'active_tab' property as input, as well as the
+    stored graphs, and renders the tab content depending on what the value of
+    'active_tab' is.
+    """
+    if active_tab is not None:
+        if active_tab == 'mjerni_krug':
+            return tab1_mejerne_komponente()
+        elif active_tab == 'vrijednosti_komponenti':
+            return tab2_tablica_komponenti()
+        else:
+            return "select some tab"
+    else:
+        return "error"
 
 # graf raw values of ntc and shunt
 @app.callback([Output('output-state', 'figure')
@@ -207,6 +227,7 @@ def update_output(n_clicks, number_of_samples, sps):
         }, generate_table(i)
 
 
+
 @app.callback(  [Output('component_table', 'children') ]
                 ,[  Input('save_button', 'n_clicks')]
                 ,[  State('input_ntc_resistance' ,'value')
@@ -223,26 +244,6 @@ def update_output(n_clicks,*args):
     config['resistor']['bettaTolerance']    =args[3]
     return [generate_table(config)]
 
-
-@app.callback(
-    Output('tab_content', 'children')
-    ,[Input("tabs", "active_tab")]
-)
-def render_tab_content(active_tab, data):
-    """
-    This callback takes the 'active_tab' property as input, as well as the
-    stored graphs, and renders the tab content depending on what the value of
-    'active_tab' is.
-    """
-    if active_tab is not None:
-        if active_tab == 'mjerni_krug':
-            return tab1_mejerne_komponente()
-        elif active_tab == 'vrijednosti_komponenti':
-            return tab2_tablica_komponenti()
-        else:
-            return "select some tab"
-    else:
-        return "error"
 
 
 if __name__ == '__main__':
