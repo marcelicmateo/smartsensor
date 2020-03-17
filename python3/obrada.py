@@ -1,6 +1,7 @@
 import datetime
 import numpy
 from yaml import safe_load
+from time import clock
 
 
 def obrada(config, kanali, zeff):
@@ -42,25 +43,33 @@ def obrada(config, kanali, zeff):
                            (r_ntc_std_r**r_std) **2) #standardna devijacija ntc-a
 
     #aproksimacija temperature exp jednadzbom
+    start=clock()
     temperatura_e=(numpy.log(r_ntc/r_ntc_25)/r_ntc_betta + 1/(25+273.15))**(-1)-273.15
+    end=clock()
+    print("temperatura Exp = {}".format(end-start))
+    start=clock()
     temperatura_e_std=temperatura_25**2*numpy.sqrt(r_ntc_betta**2*r_ntc_25**2*r_ntc_std**2 + r_ntc_betta**2*r_ntc**2*uncertanty_r_ntc_25**2 + r_ntc_25**2*r_ntc**2*uncertanty_betta_tolerance**2*numpy.log(r_ntc/r_ntc_25)**2)/(r_ntc_25*r_ntc*(r_ntc_betta + numpy.log((r_ntc/r_ntc_25)**temperatura_25))**2)
-
+    end=clock()
+    print("temperatura Exp std = {}".format(end-start))
     #aproksimacija temperature polinomom 3 reda
     A1 = 3.354016e-3
     B1 = 2.744032e-4
     C1 = 3.666944e-6
     D1 = 1.375492e-7
-
+    start=clock()
     temperatura_polinom =   \
                 (A1                             + 
                 B1*numpy.log(r_ntc/r_ntc_25)    + 
                 C1*numpy.log(r_ntc/r_ntc_25)**2 + 
                 D1*numpy.log(r_ntc/r_ntc_25)**3   
                 )**-1 - 273.15
-
+    end=clock()
+    print("temperatura polinom= {}".format(end-start))           
+    start=clock()
     temperatura_polinom_std=numpy.sqrt(r_ntc_25**2*r_ntc_std **2 + r_ntc**2*uncertanty_r_ntc_25**2)*numpy.abs(B1 + 3*D1*numpy.log(r_ntc/r_ntc_25)**2 + numpy.log((r_ntc/r_ntc_25)**(2*C1)))/ \
             (r_ntc_25*r_ntc*(A1 + C1*numpy.log(r_ntc/r_ntc_25)**2 + D1*numpy.log(r_ntc/r_ntc_25)**3 + numpy.log((r_ntc/r_ntc_25)**B1))**2)
-
+    end=clock()
+    print("temperatura polinom std = {}".format(end-start))
     U_ntc_mean = numpy.mean(kanali[0], dtype=numpy.float64)
     U_ntc_std = numpy.std(kanali[0], dtype=numpy.float64, ddof=1)
     U_shunt_mean = numpy.mean(kanali[1], dtype=numpy.float64)
