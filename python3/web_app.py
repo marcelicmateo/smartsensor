@@ -160,16 +160,21 @@ def tab1_mejerne_komponente():
             )])
             ,html.Button(id='start-button', n_clicks=0, children="start")
             ,dcc.Graph(id='output-state')
-            ,html.Table(id='calculated_values')
     ]
 
+def tab3_povratne_vrijednosti_kruga():
+    return[
+        html.Table(id='calculated_values')
+    ]
+    
+    
 
 app.layout=html.Div(children=[
     html.H1('Wellkome'),
     dcc.Tabs(id='tabs', children=[
         dcc.Tab(label='Mjerni krug', children=tab1_mejerne_komponente())                           #end tab 1
         ,dcc.Tab(label='vrijednosti komponenti', children=tab2_tablica_komponenti())    #end tab 2
-        ])
+        ,dcc.Tab(label='obradjeni podaci', children=tab3_povratne_vrijednosti_kruga())])
     ])
 
 

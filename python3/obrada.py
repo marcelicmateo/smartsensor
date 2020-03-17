@@ -1,11 +1,12 @@
 import datetime
 import numpy
 from yaml import safe_load
-from time import clock
+from time import process_time
 
 
 def obrada(config, kanali, zeff):
-    st = datetime.datetime.utcnow().strftime('%Y-%m-%d_%H:%M:%S:%f')
+    start_all=process_time()
+    st = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=+1))).strftime('%Y-%m-%d %H:%M:%S:%f')
 
     r_ntc_25 = config.get('resistor').get('resistance')
     r_ntc_tolerance = config.get('resistor').get('tolerance')
@@ -43,32 +44,32 @@ def obrada(config, kanali, zeff):
                            (r_ntc_std_r**r_std) **2) #standardna devijacija ntc-a
 
     #aproksimacija temperature exp jednadzbom
-    start=clock()
+    start=process_time()
     temperatura_e=(numpy.log(r_ntc/r_ntc_25)/r_ntc_betta + 1/(25+273.15))**(-1)-273.15
-    end=clock()
+    end=process_time()
     print("temperatura Exp = {}".format(end-start))
-    start=clock()
+    start=process_time()
     temperatura_e_std=temperatura_25**2*numpy.sqrt(r_ntc_betta**2*r_ntc_25**2*r_ntc_std**2 + r_ntc_betta**2*r_ntc**2*uncertanty_r_ntc_25**2 + r_ntc_25**2*r_ntc**2*uncertanty_betta_tolerance**2*numpy.log(r_ntc/r_ntc_25)**2)/(r_ntc_25*r_ntc*(r_ntc_betta + numpy.log((r_ntc/r_ntc_25)**temperatura_25))**2)
-    end=clock()
+    end=process_time()
     print("temperatura Exp std = {}".format(end-start))
     #aproksimacija temperature polinomom 3 reda
     A1 = 3.354016e-3
     B1 = 2.744032e-4
     C1 = 3.666944e-6
     D1 = 1.375492e-7
-    start=clock()
+    start=process_time()
     temperatura_polinom =   \
                 (A1                             + 
                 B1*numpy.log(r_ntc/r_ntc_25)    + 
                 C1*numpy.log(r_ntc/r_ntc_25)**2 + 
                 D1*numpy.log(r_ntc/r_ntc_25)**3   
                 )**-1 - 273.15
-    end=clock()
+    end=process_time()
     print("temperatura polinom= {}".format(end-start))           
-    start=clock()
+    start=process_time()
     temperatura_polinom_std=numpy.sqrt(r_ntc_25**2*r_ntc_std **2 + r_ntc**2*uncertanty_r_ntc_25**2)*numpy.abs(B1 + 3*D1*numpy.log(r_ntc/r_ntc_25)**2 + numpy.log((r_ntc/r_ntc_25)**(2*C1)))/ \
             (r_ntc_25*r_ntc*(A1 + C1*numpy.log(r_ntc/r_ntc_25)**2 + D1*numpy.log(r_ntc/r_ntc_25)**3 + numpy.log((r_ntc/r_ntc_25)**B1))**2)
-    end=clock()
+    end=process_time()
     print("temperatura polinom std = {}".format(end-start))
     U_ntc_mean = numpy.mean(kanali[0], dtype=numpy.float64)
     U_ntc_std = numpy.std(kanali[0], dtype=numpy.float64, ddof=1)
@@ -76,29 +77,33 @@ def obrada(config, kanali, zeff):
     U_shunt_std = numpy.std(kanali[1], dtype=numpy.float64, ddof=1)
     U_ntc_m_v, U_ntc_s_v, U_shunt_m_v, U_shunt_s_v = \
         map(lambda x: x * 5 /(0x7fffff), [U_ntc_mean, U_ntc_std, U_shunt_mean, U_shunt_std])
+
+    end_all=process_time() -start_all
+
     log = {
-        "timestamp": st,
+        "Timestamp": st,
         #"U_ntc_raw":kanali[0],
-        "U_ntc_mean": U_ntc_mean,
-        "U_ntc_m_v": U_ntc_m_v,
-        " U_ntc_s_v": U_ntc_s_v,
-        "U_shunt_m_v": U_shunt_m_v,
-        "U_shunt_s_v": U_shunt_s_v,
-        "U_ntc_std": U_ntc_std,
+        "Napon NTC": U_ntc_mean,
+        "std NTC": U_ntc_std,
+        "Napon SHUNT": U_shunt_mean,
+        "std SHUNT": U_shunt_std,
+        "Omjer napona sr. vr.": r_mean,
+        "std Omjera ntc/shunt": r_std,
+        "Napon NTC [V]": U_ntc_m_v,
+        "std NTC[V]": U_ntc_s_v,
+        "Napon SHUNT[V]": U_shunt_m_v,
+        "std SHUNT [V]": U_shunt_s_v,
         #"U_shunt_raw":kanali[1],
-        "U_shunt_mean": U_shunt_mean,
-        "U_shunt_std": U_shunt_std,
-        "otpor_ntc": r_ntc,
-        "std_NTC": r_ntc_std,
-        "utjecaj_shunta_us": uncertanty_shunt_tolerance,
-        "utjecaj_omjera_napona_r": r_std,
-        "omjer_namona_r_mean": r_mean,
+        "Otpor": r_ntc,
+        "std NTC": r_ntc_std,
+        "Utjecaj tolerancije shunta": uncertanty_shunt_tolerance,
         "temperatura_polinom": temperatura_polinom,
         "temperatura_e" : temperatura_e,
         'temperatura_polinom_std' : temperatura_polinom_std,
-        'temperatura_e_std':temperatura_e_std
+        'temperatura_e_std':temperatura_e_std,
+        'Vrijeme obrade' : end_all
     }
-
+    
 
     return (log)
 
@@ -109,4 +114,4 @@ def open_config(name):
 
 
 if __name__ == "__main__":
-    obrada(open_config('config.yaml'),[[1,4],[2,6]], 10**6)
+    print(obrada(open_config('config.yaml'),[[1,4],[2,6]], 10**6))
