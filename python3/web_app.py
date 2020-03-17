@@ -97,21 +97,18 @@ def generate_button_inputs():
 
 
 def tab2_tablica_komponenti():
-    return [
+    return [html.Div(style={'display': 'inline-block'},children=[
     dcc.Markdown('''
     ## Vrijednosti elemenata mjernog kruga
     BLA BLA BLA, jebene tablice
     ''')
     ,dbc.Row([
-        dbc.Col(html.Div(id='component_table',style={'display': 'inline-block'},children=[generate_table(config)]))
-    , dbc.Col(html.Div(style={'display': 'inline-block', 'padding-left' : '4rem'},children=generate_button_inputs()))
-    ])]
+    dbc.Col(html.Div(id='component_table',style={'display': 'inline-block'},children=[generate_table(config)]))
+    ,dbc.Col(html.Div(style={'display': 'inline-block', 'padding-left' : '4rem'},children=generate_button_inputs()))
+    ])])]
 
-
-app.layout=html.Div(children=[
-    html.H1('Wellkome'),
-    dcc.Tabs(id='tabs', children=[
-        dcc.Tab(label='Mjerni krug', children=[
+def tab1_mejerne_komponente():
+    return [
         html.Div(children=[
             html.H2('Vrijednosti mejernog kruga')
             ,html.Table(id='default_values_resistance',children=[
@@ -164,17 +161,18 @@ app.layout=html.Div(children=[
             ,html.Button(id='start-button', n_clicks=0, children="start")
             ,dcc.Graph(id='output-state')
             ,html.Table(id='calculated_values')
-    ])#end tab 1
-    ,dcc.Tab(label='vrijednosti komponenti', children=[
-       html.Div(style={'display': 'inline-block'},children=
-    tab2_tablica_komponenti()
-    )
-    ])#end of tab 2
+    ]
 
-    ])#end tabs
-    ], #end 1 div children
-    id='raw'
-)# end app
+
+app.layout=html.Div(children=[
+    html.H1('Wellkome'),
+    dcc.Tabs(id='tabs', children=[
+        dcc.Tab(label='Mjerni krug',tab_id='mjerni_krug', children=tab1_mejerne_komponente())                           #end tab 1
+        ,dcc.Tab(label='vrijednosti komponenti', tab_id='vrijednosti_komponenti', children=tab2_tablica_komponenti())    #end tab 2
+        ]
+        , active_tab="mjerni_krug",)
+    ,html.Div(id='tab_content')
+    ])
 
 # graf raw values of ntc and shunt
 @app.callback([Output('output-state', 'figure')
@@ -219,12 +217,32 @@ def update_output(n_clicks, number_of_samples, sps):
 def update_output(n_clicks,*args):
     if n_clicks==0:
         raise PreventUpdate
-    config['resistor']['resistance']=args[0]
-    config['resistor']['tolerance']=args[1]
-    config['resistor']['betta']=args[2]
-    config['resistor']['bettaTolerance']=args[3]
+    config['resistor']['resistance']        =args[0]
+    config['resistor']['tolerance']         =args[1]
+    config['resistor']['betta']             =args[2]
+    config['resistor']['bettaTolerance']    =args[3]
     return [generate_table(config)]
 
+
+@app.callback(
+    Output('tab_content', 'children')
+    ,[Input("tabs", "active_tab")]
+)
+def render_tab_content(active_tab, data):
+    """
+    This callback takes the 'active_tab' property as input, as well as the
+    stored graphs, and renders the tab content depending on what the value of
+    'active_tab' is.
+    """
+    if active_tab is not None:
+        if active_tab == 'mjerni_krug':
+            return tab1_mejerne_komponente()
+        elif active_tab == 'vrijednosti_komponenti':
+            return tab2_tablica_komponenti()
+        else:
+            return "select some tab"
+    else:
+        return "error"
 
 
 if __name__ == '__main__':
