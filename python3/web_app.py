@@ -166,33 +166,13 @@ def tab1_mejerne_komponente():
 
 app.layout=html.Div(children=[
     html.H1('Wellkome'),
-    dbc.Tabs(id='tabs', children=[
-        dbc.Tab(label='Mjerni krug',tab_id='mjerni_krug')                           #end tab 1
-        ,dbc.Tab(label='vrijednosti komponenti', tab_id='vrijednosti_komponenti')    #end tab 2
-        ]
-        , active_tab="mjerni_krug")
-    ,html.Div(id='tab_content')
+    dcc.Tabs(id='tabs', children=[
+        dcc.Tab(label='Mjerni krug', children=tab1_mejerne_komponente())                           #end tab 1
+        ,dcc.Tab(label='vrijednosti komponenti', children=tab2_tablica_komponenti())    #end tab 2
+        ])
     ])
 
-@app.callback(
-    Output('tab_content', 'children')
-    ,[Input("tabs", "active_tab")]
-)
-def render_tab_content(active_tab):
-    """
-    This callback takes the 'active_tab' property as input, as well as the
-    stored graphs, and renders the tab content depending on what the value of
-    'active_tab' is.
-    """
-    if active_tab is not None:
-        if active_tab == 'mjerni_krug':
-            return tab1_mejerne_komponente()
-        elif active_tab == 'vrijednosti_komponenti':
-            return tab2_tablica_komponenti()
-        else:
-            return "select some tab"
-    else:
-        return "error"
+
 
 # graf raw values of ntc and shunt
 @app.callback([Output('output-state', 'figure')
