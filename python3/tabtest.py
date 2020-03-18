@@ -12,80 +12,49 @@ import dash_core_components as dcc
 import dash_html_components as html
 import numpy as np
 import plotly.graph_objs as go
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
+from dash.exceptions import PreventUpdate
+
 
 app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 
-app.layout = dbc.Container(
-    [
-        dcc.Store(id="store"),
-        html.H1("Dynamically rendered tab content"),
-        html.Hr(),
-        dbc.Button(
-            "Regenerate graphs",
-            color="primary",
-            block=True,
-            id="button",
-            className="mb-3",
-        ),
-        dbc.Tabs(
-            [
-                dbc.Tab(label="Scatter", tab_id="scatter"),
-                dbc.Tab(label="Histograms", tab_id="histogram"),
-            ],
-            id="tabs",
-        ),
-        html.Div(id="tab-content", className="p-4"),
-    ]
-)
-
-
-@app.callback(
-    Output("tab-content", "children"),
-    [Input("tabs", "active_tab"), Input("store", "data")],
-)
-def render_tab_content(active_tab, data):
-    """
-    This callback takes the 'active_tab' property as input, as well as the
-    stored graphs, and renders the tab content depending on what the value of
-    'active_tab' is.
-    """
-    if active_tab and data is not None:
-        if active_tab == "scatter":
-            return dcc.Graph(figure=data["scatter"])
-        elif active_tab == "histogram":
-            return dbc.Row(
-                [
-                    dbc.Col(dcc.Graph(figure=data["hist_1"]), width=6),
-                    dbc.Col(dcc.Graph(figure=data["hist_2"]), width=6),
-                ]
+app.layout =html.Div(children=[ html.Label(['Koliko mjerenja prema intervalu od 5 min',
+                dcc.Input(
+                        id='input_interval_number'
+                        ,value = 0
+                        ,type = 'number'
+                        ,step = 1
+                        ,min = 1
+                        ,max = 500
+                        ,inputMode = "numeric"
+                        ,required=True
+                        ,disabled=False
+                    )
+            ,html.Button(id='interval-button', n_clicks=0, children="set interval")
+            ])
+            ,html.Button(id='start-button', disabled=False, n_clicks=0, children="start")
+            ,dcc.Interval(
+            id='interval_uzoraka',
+            interval=5*60*1000, # in milliseconds 5 min
+            n_intervals=0,
+            max_intervals=0
             )
-    return data
+])
 
+@app.callback([Output('interval_uzoraka', 'max_intervals')
+                , Output('start-button', 'disabled')
+                , Output('interval-button', 'children')
+                , Output('input_interval_number', 'disabled')]
+                , [Input('interval-button', 'n_clicks')]
+                , [State('start-button', 'disabled')
+                , State('input_interval_number', 'value')]
+            )
+def periodic_update_enable(n, disable, value):
+    if n == 0:
+        raise PreventUpdate
+    print('UPDATE')
+    return value, not disable, ('Set interval', "STOP")[not disable], not disable
 
-@app.callback(Output("store", "data"), [Input("button", "n_clicks")])
-def generate_graphs(n):
-    """
-    This callback generates three simple graphs from random data.
-    """
-    if not n:
-        # generate empty graphs when app loads
-        return {k: go.Figure(data=[]) for k in ["scatter", "hist_1", "hist_2"]}
-
-    # simulate expensive graph generation process
-    time.sleep(2)
-
-    # generate 100 multivariate normal samples
-    data = np.random.multivariate_normal([0, 0], [[1, 0.5], [0.5, 1]], 100)
-
-    scatter = go.Figure(
-        data=[go.Scatter(x=data[:, 0], y=data[:, 1], mode="markers")]
-    )
-    hist_1 = go.Figure(data=[go.Histogram(x=data[:, 0])])
-    hist_2 = go.Figure(data=[go.Histogram(x=data[:, 1])])
-
-    # save figures in a dictionary for sending to the dcc.Store
-    return {"scatter": scatter, "hist_1": hist_1, "hist_2": hist_2}
 
 
 if __name__ == "__main__":

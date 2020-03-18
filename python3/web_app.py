@@ -173,6 +173,8 @@ def tab1_mejerne_komponente():
                         ,min = 1
                         ,max = 500
                         ,inputMode = "numeric"
+                        ,required=True
+                        ,disabled=False
                     )
             ])
             ,html.Button(id='interval-button', n_clicks=0, children="set interval")
@@ -196,16 +198,20 @@ app.layout=html.Div(children=[
     ])
 
 
+
 @app.callback([Output('interval_uzoraka', 'max_intervals')
                 , Output('start-button', 'disabled')
-                , Output('interval-button', 'children')]
-                , [Input('interval-buton', 'n_clicks')]
+                , Output('interval-button', 'children')
+                , Output('input_interval_number', 'disabled')]
+                , [Input('interval-button', 'n_clicks')]
                 , [State('start-button', 'disabled')
                 , State('input_interval_number', 'value')]
             )
 def periodic_update_enable(n, disable, value):
+    if n == 0:
+        raise PreventUpdate
     print('UPDATE')
-    return value, not disable, ('Set interval', "STOP")[disable]
+    return value, not disable, ('Set interval', "STOP")[not disable], not disable
 
 # graf raw values of ntc and shunt
 @app.callback([Output('output-state', 'figure')
