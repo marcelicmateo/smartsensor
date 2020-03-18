@@ -158,7 +158,25 @@ def tab1_mejerne_komponente():
                     ,inputMode = "numeric"
                     ,required = True
             )])
-            ,html.Button(id='start-button', n_clicks=0, children="start")
+            ,dcc.Interval(
+            id='interval_uzoraka',
+            interval=5*60*1000, # in milliseconds 5 min
+            n_intervals=0,
+            max_intervals=0
+            )
+            ,html.Label(['Koliko mjerenja prema intervalu od 5 min',
+                dcc.Input(
+                        id='input_interval_number'
+                        ,value = 0
+                        ,type = 'number'
+                        ,step = 1
+                        ,min = 1
+                        ,max = 500
+                        ,inputMode = "numeric"
+                    )
+            ])
+            ,html.Button(id='interval-button', n_clicks=0, children="set interval")
+            ,html.Button(id='start-button', disabled=False, n_clicks=0, children="start")
             ,dcc.Graph(id='output-state')
     ]
 
@@ -178,14 +196,25 @@ app.layout=html.Div(children=[
     ])
 
 
+@app.callback([Output('interval_uzoraka', 'max_intervals')
+                , Output('start-button', 'disabled')
+                , Output('interval-button', 'children')]
+                , [Input('interval-buton', 'n_clicks')]
+                , [State('start-button', 'disabled')
+                , State('input_interval_number', 'value')]
+            )
+def periodic_update_enable(n, disable, value):
+    print('UPDATE')
+    return value, not disable, ('Set interval', "STOP")[disable]
 
 # graf raw values of ntc and shunt
 @app.callback([Output('output-state', 'figure')
             ,Output('calculated_values', 'children')]
-      ,[Input('start-button', 'n_clicks')]
+      ,[Input('start-button', 'n_clicks')
+      , Input('interval_uzoraka', 'n_intervals')]
       ,[State('number_of_samples', 'value')
       ,State('sps', 'value')])
-def update_output(n_clicks, number_of_samples, sps):
+def update_output(n_clicks, n_intervals, number_of_samples, sps):
     if n_clicks==0 or number_of_samples is None:
         raise PreventUpdate
     else:
