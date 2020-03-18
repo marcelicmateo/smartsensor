@@ -158,12 +158,6 @@ def tab1_mejerne_komponente():
                     ,inputMode = "numeric"
                     ,required = True
             )])
-            ,dcc.Interval(
-            id='interval_uzoraka',
-            interval=5*60*1000, # in milliseconds 5 min
-            n_intervals=0,
-            max_intervals=0
-            )
             ,html.Label(['Koliko mjerenja prema intervalu od 5 min',
                 dcc.Input(
                         id='input_interval_number'
@@ -190,8 +184,14 @@ def tab3_povratne_vrijednosti_kruga():
     
 
 app.layout=html.Div(children=[
-    html.H1('Wellkome'),
-    dcc.Tabs(id='tabs', children=[
+    html.H1('Wellkome')
+    ,dcc.Interval(
+            id='interval_uzoraka',
+            interval=1*60*1000, # in milliseconds 5 min
+            n_intervals=0,
+            max_intervals=0
+            )
+    ,dcc.Tabs(id='tabs', children=[
         dcc.Tab(label='Mjerni krug', children=tab1_mejerne_komponente())                           #end tab 1
         ,dcc.Tab(label='vrijednosti komponenti', children=tab2_tablica_komponenti())    #end tab 2
         ,dcc.Tab(label='obradjeni podaci', children=tab3_povratne_vrijednosti_kruga())])
