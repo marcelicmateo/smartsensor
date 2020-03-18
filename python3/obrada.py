@@ -2,6 +2,10 @@ import datetime
 import numpy
 from yaml import safe_load
 from time import process_time
+from pandas import DataFrame as df
+from os.path import exists
+
+LOG_DIR = 'log_mjerenja.csv'
 
 
 def obrada(config, kanali, zeff):
@@ -97,14 +101,16 @@ def obrada(config, kanali, zeff):
         "Otpor": r_ntc,
         "std NTC": r_ntc_std,
         "Utjecaj tolerancije shunta": uncertanty_shunt_tolerance,
-        "temperatura_polinom": temperatura_polinom,
-        "temperatura_e" : temperatura_e,
-        'temperatura_polinom_std' : temperatura_polinom_std,
-        'temperatura_e_std':temperatura_e_std,
+        "Temperatura izracunata polinomom": temperatura_polinom,
+        'STD Temperature polinomom' : temperatura_polinom_std,
+        "Temperatura izracunata exp." : temperatura_e,
+        'STD temperature Exp.':temperatura_e_std,
         'Vrijeme obrade' : end_all
     }
-    
 
+    l=df([log])
+    #print(l)
+    l.to_csv(LOG_DIR, mode='a', sep=';', index= False, header=(not exists(LOG_DIR)))
     return (log)
 
 def open_config(name):
