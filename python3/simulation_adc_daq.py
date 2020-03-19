@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 from random import sample
+from numpy import zeros, int32
+
 
 def adc_daq(number_of_samples=100, sps='ADS1256_3750SPS', gain = 'ADS1256_GAIN_1'):
 

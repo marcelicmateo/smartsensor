@@ -64,7 +64,6 @@ def generate_button_inputs():
                     ,step = 1
                     ,min = 1
                     ,max = 50000
-                    ,debounce = True
                     ,inputMode = "numeric"
                     ,required = True
             )]) ,html.Label(['NTC TOLERANCE',dcc.Input(
@@ -74,7 +73,6 @@ def generate_button_inputs():
                     ,step = 1
                     ,min = 1
                     ,max = 50000
-                    ,debounce = True
                     ,inputMode = "numeric"
                     ,required = True
             )])  ,html.Label(['NTC BETTA',dcc.Input(
@@ -84,7 +82,6 @@ def generate_button_inputs():
                     ,step = 1
                     ,min = 1
                     ,max = 50000
-                    ,debounce = True
                     ,inputMode = "numeric"
                     ,required = True
             )]) ,html.Label(['NTC BETTA TOLERANCE',dcc.Input(
@@ -94,7 +91,6 @@ def generate_button_inputs():
                     ,step = 1
                     ,min = 1
                     ,max = 50000
-                    ,debounce = True
                     ,inputMode = "numeric"
                     ,required = True
             )]) ,html.Button(id='save_button', n_clicks=0, children="SAVE")
@@ -175,8 +171,8 @@ def tab1_mejerne_komponente():
                         ,required=True
                         ,disabled=False
                     )
-            ])
             ,html.Button(id='interval-button', n_clicks=0, children="set interval")
+            ])
             ,html.Button(id='start-button', disabled=False, n_clicks=0, children="start")
             ,dcc.Graph(id='output-state')
     ]
@@ -192,7 +188,7 @@ app.layout=html.Div(children=[
     html.H1('Wellkome')
     ,dcc.Interval(
             id='interval_uzoraka',
-            interval=1*60*1000, # in milliseconds 5 min
+            interval=2*1000, # in milliseconds 5 min
             n_intervals=0,
             max_intervals=0
             )
@@ -205,18 +201,21 @@ app.layout=html.Div(children=[
 
 
 @app.callback([Output('interval_uzoraka', 'max_intervals')
+                , Output('interval_uzoraka', 'n_intervals')
                 , Output('start-button', 'disabled')
                 , Output('interval-button', 'children')
-                , Output('input_interval_number', 'disabled')]
+                , Output('input_interval_number', 'disabled')
+                , Output('number_of_samples', 'disabled')
+                , Output('sps', 'disabled')
+            ]           
                 , [Input('interval-button', 'n_clicks')]
                 , [State('start-button', 'disabled')
                 , State('input_interval_number', 'value')]
             )
 def periodic_update_enable(n, disable, value):
-    if n == 0:
+    if n == 0 or value == None:
         raise PreventUpdate
-    print('UPDATE')
-    return value, not disable, ('Set interval', "STOP")[not disable], not disable
+    return (value, 0)[n%2==0], (1, 0)[n%2==0], not disable, ('Set interval', "STOP")[not disable], not disable, not disable, not disable
 
 # graf raw values of ntc and shunt
 @app.callback([Output('output-state', 'figure')
@@ -224,13 +223,12 @@ def periodic_update_enable(n, disable, value):
       ,[Input('start-button', 'n_clicks')
       , Input('interval_uzoraka', 'n_intervals')]
       ,[State('number_of_samples', 'value')
-      ,State('sps', 'value')])
+      , State('sps', 'value')])
 def update_output(n_clicks, n_intervals, number_of_samples, sps):
-    if n_clicks==0 or number_of_samples is None:
+    if number_of_samples is None or n_intervals==0 and n_clicks==0:
         raise PreventUpdate
     else:
         k=get_adc_raw_values(number_of_samples=number_of_samples, sps=sps)
-        #print(k)
         i=obrada(config={'resistor' : config.get('resistor'),'shunt':  config.get('shunt')}
                 , kanali=k
                 , zeff = config.get('adc').get('sps_zeff').get(sps))
@@ -251,7 +249,14 @@ def update_output(n_clicks, n_intervals, number_of_samples, sps):
             }
         }, generate_table(i)
 
-
+@app.callback([Output('save_button', 'disabled')],
+                [Input('input_ntc_betta','value')
+                ,Input('input_ntc_resistance','value')
+                ,Input('input_ntc_resistance_tolerance','value')
+                ,Input('input_ntc_betta_tolerance','value')
+                ])
+def sa(*args):
+    return ([False], [True])[None in args]
 
 @app.callback(  [Output('component_table', 'children') ]
                 ,[  Input('save_button', 'n_clicks')]
