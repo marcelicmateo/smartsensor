@@ -3,7 +3,6 @@ import dash_core_components as dcc
 import dash_html_components as html
 import dash_table
 from dash.dependencies import Input, Output, State
-import adc_daq
 from dash.exceptions import PreventUpdate
 import plotly.graph_objs as go
 import yaml
@@ -11,6 +10,14 @@ from obrada import obrada
 from numpy import divide, max
 import json
 import dash_bootstrap_components as dbc
+from os.path import exists
+
+if exists('/sys/firmware/devicetree/base/model/'):
+    import adc_daq
+else:
+    import simulation_adc_daq as adc_daq
+
+
 
 #external_stylesheets = ["https://codepen.io/chriddyp/pen/bWLwgP.css"]
 
