@@ -24,9 +24,9 @@ def adc_daq(number_of_samples=100, sps='ADS1256_3750SPS', gain = 'ADS1256_GAIN_1
     return channels
 
 if __name__ == "__main__":
-    c=adc_daq(30000,'ADS1256_30000SPS')
+    c=adc_daq()
     with open('config.yaml','r') as f:
         conf=yaml.safe_load(f)
-    log=obrada.obrada(config=conf,kanali=c, sps='ADS1256_30000SPS')
+    log=obrada.obrada(config=conf,kanali=c, zeff=conf.get('sps_zeff').get('ADS1256_30000SPS'))
     print(log)
     

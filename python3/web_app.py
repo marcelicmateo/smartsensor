@@ -4,8 +4,6 @@ import dash_html_components as html
 import dash_table
 from dash.dependencies import Input, Output, State
 import adc_daq
-import ADS1256
-import config
 from dash.exceptions import PreventUpdate
 import plotly.graph_objs as go
 import yaml
@@ -17,7 +15,7 @@ import dash_bootstrap_components as dbc
 #external_stylesheets = ["https://codepen.io/chriddyp/pen/bWLwgP.css"]
 
 app = dash.Dash(__name__)
-app.config['suppress_callback_exceptions']=True
+#app.config['suppress_callback_exceptions']=True
 server = app.server
 
 with open('config.yaml') as f:
@@ -192,7 +190,7 @@ app.layout=html.Div(children=[
             max_intervals=0
             )
     ,dcc.Tabs(id='tabs', children=[
-        dcc.Tab(label='Mjerni krug', children=tab1_mejerne_komponente())                           #end tab 1
+        dcc.Tab(label='Mjerni krug', children=tab1_mejerne_komponente())                #end tab 1
         ,dcc.Tab(label='vrijednosti komponenti', children=tab2_tablica_komponenti())    #end tab 2
         ,dcc.Tab(label='obradjeni podaci', children=tab3_povratne_vrijednosti_kruga())])
     ])
@@ -255,13 +253,11 @@ def update_output(n_clicks, n_intervals, number_of_samples, sps):
                 ,   State('input_ntc_betta','value')    
                 ,   State('input_ntc_betta_tolerance','value')
                 ])
-def update_output(n_clicks,*args):
-    if n_clicks==0:
-        raise PreventUpdate
-    config['resistor']['resistance']        =args[0]
-    config['resistor']['tolerance']         =args[1]
-    config['resistor']['betta']             =args[2]
-    config['resistor']['bettaTolerance']    =args[3]
+def update_output(n_clicks,ntc, tolerancija, betta, btolerancija):
+    config['resistor']['resistance']        =ntc
+    config['resistor']['tolerance']         =tolerancija
+    config['resistor']['betta']             =betta
+    config['resistor']['bettaTolerance']    =btolerancija
     return [generate_table(config)]
 
 
