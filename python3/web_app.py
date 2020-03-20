@@ -14,7 +14,7 @@ from pandas import DataFrame as df
 from pandas import read_csv
 from os.path import exists
 
-if exists('/sys/firmware/devicetree/base/model/'):
+if exists('/sys/firmware/devicetree/base/model'):
     import adc_daq
 else:
     import simulation_adc_daq as adc_daq
@@ -345,4 +345,4 @@ def update_table(n_clicks,ntc, tolerancija, betta, btolerancija):
 
 if __name__ == '__main__':
     #print(adc_daq.adc_daq(100,'ADS1256_3750SPS'))
-    app.run_server(debug=True)
+    app.run_server(debug=False)
