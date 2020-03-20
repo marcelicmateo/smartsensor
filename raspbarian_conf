@@ -1,0 +1,38 @@
+###
+20.1.2020.
+-------
+mounted /tmp/db to ram
+unutar /etc/fstab
+dodano na kraj 
+tmpfs /tmp/db tmpfs defaults,noatime,nosuid,size=100m 0 0
+###
+
+
+
+
+###
+
+29.1.2020
+------------
+sudo pip3 install uwsgi 
+
+i pokrenut sa
+
+sudo uwsgi --plugin python,http --http=192.168.5.27:8080 --master --module web_app:server --processes 2
+
+u direktoriju di je web_app
+
+http://192.168.5.27:8080/
+adresa na kojoj se pokrene
+####
+
+#####
+22.02.2020.
+----------------------
+napravljena setup.sh skripta
+bash skripta za napraviti py environmet
+
+source setup.sh
+
+###
+

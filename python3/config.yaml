@@ -1,0 +1,42 @@
+editor: MateoM
+date: 2020/03/06
+device: smartsensor
+resistor: 
+  id: ID vishay
+  resistance: 22000
+  tolerance: 5
+  betta: 3740
+  bettaTolerance: 2
+shunt: 
+  id: ID shunt
+  resistance: 10000
+  tolerance: 1
+adc: 
+  sps_zeff:
+    { 'ADS1256_30000SPS' : 10000000, # reset the default values
+    'ADS1256_15000SPS' : 10000000,
+    'ADS1256_7500SPS' : 10000000,
+    'ADS1256_3750SPS' : 10000000,
+    'ADS1256_2000SPS' : 10000000,
+    'ADS1256_1000SPS' : 20000000,
+    'ADS1256_500SPS' : 40000000,
+    'ADS1256_100SPS' : 40000000,
+    'ADS1256_60SPS' : 40000000,
+    'ADS1256_30SPS' : 80000000,
+    'ADS1256_50SPS' : 80000000,
+    'ADS1256_25SPS' : 80000000,
+    'ADS1256_15SPS' : 80000000,
+    'ADS1256_10SPS' : 80000000,
+    'ADS1256_5SPS' : 80000000,
+    'ADS1256_2d5SPS' : 80000000 }
+  fclkin: 768000000
+  refVoltage: 
+    id: zenner
+    voltage: 2.5
+    #tolerance:
+powerSource:
+  id: kinez
+  voltage: 3.3
+  #maxCurrent:
+  settlingtime: 47000e-6
+
