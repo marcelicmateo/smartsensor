@@ -2,15 +2,13 @@ import datetime
 import numpy
 from yaml import safe_load
 from time import process_time
-from pandas import DataFrame as df
-from os.path import exists
 
-LOG_DIR = 'log_mjerenja.csv'
+
 
 
 def obrada(config, kanali, zeff):
     start_all=process_time()
-    st = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=+1))).strftime('%Y-%m-%d %H:%M:%S:%f')
+    st = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=+1))).strftime('%Y-%m-%d %H:%M:%S')
 
     r_ntc_25 = config.get('resistor').get('resistance')
     r_ntc_tolerance = config.get('resistor').get('tolerance')
@@ -108,9 +106,6 @@ def obrada(config, kanali, zeff):
         'Vrijeme obrade' : end_all
     }
 
-    l=df([log])
-    #print(l)
-    l.to_csv(LOG_DIR, mode='a', sep=';', index= False, header=(not exists(LOG_DIR)))
     return (log)
 
 def open_config(name):

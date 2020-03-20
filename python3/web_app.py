@@ -7,9 +7,11 @@ from dash.exceptions import PreventUpdate
 import plotly.graph_objs as go
 import yaml
 from obrada import obrada
-from numpy import divide, max
+from numpy import divide, max, recarray
 import json
 import dash_bootstrap_components as dbc
+from pandas import DataFrame as df
+from pandas import read_csv
 from os.path import exists
 
 if exists('/sys/firmware/devicetree/base/model/'):
@@ -22,15 +24,56 @@ else:
 #external_stylesheets = ["https://codepen.io/chriddyp/pen/bWLwgP.css"]
 
 app = dash.Dash(__name__)
-#app.config['suppress_callback_exceptions']=True
+app.config['suppress_callback_exceptions']=False
 server = app.server
+
+LISTA_MJERENIH_PODATAKA=['Timestamp',
+ 'Napon NTC',
+ 'std NTC',
+ 'Napon SHUNT',
+ 'std SHUNT',
+ 'Omjer napona sr. vr.',
+ 'std Omjera ntc/shunt',
+ 'Napon NTC [V]',
+ 'std NTC[V]',
+ 'Napon SHUNT[V]',
+ 'std SHUNT [V]',
+ 'Otpor',
+ 'Utjecaj tolerancije shunta',
+ 'Temperatura izracunata polinomom',
+ 'STD Temperature polinomom',
+ 'Temperatura izracunata exp.',
+ 'STD temperature Exp.',
+ 'Vrijeme obrade']
+
+LOG_DAT = 'log_mjerenja6.csv'
+
+if not exists(LOG_DAT): 
+    df(columns=LISTA_MJERENIH_PODATAKA).to_csv(LOG_DAT, index=False, sep=';')
+    index_log=0
+    LOG_MJERENJA={}
+else:
+    LOG_MJERENJA=read_csv(LOG_DAT, sep=';').to_dict('index')
+    index_log=(len(LOG_MJERENJA)-1)
+
+
+def generate_output_table(log, velicina):
+    global index_log
+    l=df([log])
+    print(index_log)
+    l.to_csv(LOG_DAT, mode='a', sep=';', index= False, header=False)
+    index_log=index_log+1
+    LOG_MJERENJA[index_log]=log
+    return ([LOG_MJERENJA.get(i,{}) for i in list(range(index_log-velicina,index_log,1))])
 
 with open('config.yaml') as f:
     config=yaml.safe_load(f)
 
-#generate table from dict
-def generate_table(dic):
+
+def generate_table_from_dict(dic):
     return [html.Tr(html.Td("{} : {}".format(col[0],col[1]))) for col in dic.items()]
+
+
 
 def get_adc_raw_values(sps='ADS1256_3750SPS', number_of_samples=100):
     return(adc_daq.adc_daq(number_of_samples=number_of_samples,sps=sps))
@@ -47,11 +90,11 @@ def dict_to_markdown(dict):
 
 
 #generate table from yaml dictionary
-def generate_table(dic):
+def generate_table_from_yaml(dic):
     html_table_return=[]
     for k,v in dic.items():
         if type(v) is dict:
-            html_table_return.append(html.Tr([html.Td(style={'font-weight': 'bold', 'border-right' : 'double' ,  'vertical-align' : 'top'},children="{}".format(k)),generate_table(v)]))
+            html_table_return.append(html.Tr([html.Td(style={'font-weight': 'bold', 'border-right' : 'double' ,  'vertical-align' : 'top'},children="{}".format(k)),generate_table_from_yaml(v)]))
         else:
             html_table_return.append(html.Tr([html.Td(style={'font-weight': 'bold'},children="{}".format(k)), html.Td("{}".format(v))]))
     return html.Table(html_table_return)
@@ -104,7 +147,7 @@ def tab2_tablica_komponenti():
     BLA BLA BLA, jebene tablice
     ''')
     ,dbc.Row([
-    dbc.Col(html.Div(id='component_table',style={'display': 'inline-block'},children=[generate_table(config)]))
+    dbc.Col(html.Div(id='component_table',style={'display': 'inline-block'},children=[generate_table_from_yaml(config)]))
     ,dbc.Col(html.Div(style={'display': 'inline-block', 'padding-left' : '4rem'},children=generate_button_inputs()))
     ])])]
 
@@ -159,9 +202,20 @@ def tab1_mejerne_komponente():
                     ,inputMode = "numeric"
                     ,required = True
             )])
-            ,html.Label(['Koliko mjerenja prema intervalu od 5 min',
+            ,html.Label(['Koliko mjerenja prema intervalu (sekundi)',
                 dcc.Input(
                         id='input_interval_number'
+                        ,value = 0
+                        ,type = 'number'
+                        ,step = 1
+                        ,min = 1
+                        ,max = 500
+                        ,inputMode = "numeric"
+                        ,required=True
+                        ,disabled=False
+                    )
+            ,dcc.Input(
+                        id='input_interval_time'
                         ,value = 0
                         ,type = 'number'
                         ,step = 1
@@ -178,8 +232,17 @@ def tab1_mejerne_komponente():
     ]
 
 def tab3_povratne_vrijednosti_kruga():
-    return[
-        html.Table(id='calculated_values')
+    return[html.Label(["Velicina tablice",dcc.Input(
+                    id='input_velicina_tablice'
+                    ,value = 5
+                    ,type = 'number'
+                    ,step = 1
+                    ,min = 1
+                    ,max = 10
+                    ,inputMode = "numeric"
+                    ,required = True
+            )])
+       ,dash_table.DataTable(id='table_calculated_values',columns=[{'name' : i, 'id' : i } for i in LISTA_MJERENIH_PODATAKA])
     ]
     
     
@@ -200,34 +263,38 @@ app.layout=html.Div(children=[
 
 
 
-@app.callback([Output('interval_uzoraka', 'max_intervals')
+@app.callback([Output('interval_uzoraka', 'interval')
+                , Output('interval_uzoraka', 'max_intervals')
                 , Output('interval_uzoraka', 'n_intervals')
                 , Output('start-button', 'disabled')
                 , Output('interval-button', 'children')
                 , Output('input_interval_number', 'disabled')
                 , Output('number_of_samples', 'disabled')
                 , Output('sps', 'disabled')
+                , Output('input_interval_time','disabled')
             ]           
                 , [Input('interval-button', 'n_clicks')]
                 , [State('start-button', 'disabled')
+                ,  State('input_interval_time', 'value')
                 , State('input_interval_number', 'value')]
             )
-def periodic_update_enable(n, disable, value):
+def periodic_update_toogle(n,disable,  interval_time,value):
     if n == 0 or value == None:
         raise PreventUpdate
-    return (value, 0)[n%2==0], (1, 0)[n%2==0], not disable, ('Set interval', "STOP")[not disable], not disable, not disable, not disable
+    return interval_time*1000, (value, 0)[n%2==0], (1, 0)[n%2==0], not disable, ('Set interval', "STOP")[not disable], not disable, not disable, not disable, not disable
 
 # graf raw values of ntc and shunt
 @app.callback([Output('output-state', 'figure')
-            ,Output('calculated_values', 'children')]
-      ,[Input('start-button', 'n_clicks')
-      , Input('interval_uzoraka', 'n_intervals')]
-      ,[State('number_of_samples', 'value')
-      , State('sps', 'value')])
-def update_output(n_clicks, n_intervals, number_of_samples, sps):
+            ,Output('table_calculated_values', 'data')]
+            ,[Input('start-button', 'n_clicks')
+            , Input('interval_uzoraka', 'n_intervals')]
+            ,[State('number_of_samples', 'value')
+            , State('sps', 'value')
+            ,State ('input_velicina_tablice', 'value')])
+def update_output(n_clicks, n_intervals, number_of_samples, sps, velicina):
     if number_of_samples is None or n_intervals==0 and n_clicks==0:
         raise PreventUpdate
-    else:
+    else:        
         k=get_adc_raw_values(number_of_samples=number_of_samples, sps=sps)
         i=obrada(config={'resistor' : config.get('resistor'),'shunt':  config.get('shunt')}
                 , kanali=k
@@ -247,7 +314,9 @@ def update_output(n_clicks, n_intervals, number_of_samples, sps):
                 'xaxis' : {'title' : "number of samples taken"},
                 'yaxis' : {'title' : "voltage [V], in raw integer values"}
             }
-        }, generate_table(i)
+        }, generate_output_table(i,velicina)
+
+
 
 @app.callback([Output('save_button', 'disabled')],
                 [Input('input_ntc_betta','value')
@@ -255,7 +324,7 @@ def update_output(n_clicks, n_intervals, number_of_samples, sps):
                 ,Input('input_ntc_resistance_tolerance','value')
                 ,Input('input_ntc_betta_tolerance','value')
                 ])
-def sa(*args):
+def save_button_disable_enable(*args):
     return ([False], [True])[None in args]
 
 @app.callback(  [Output('component_table', 'children') ]
@@ -265,12 +334,12 @@ def sa(*args):
                 ,   State('input_ntc_betta','value')    
                 ,   State('input_ntc_betta_tolerance','value')
                 ])
-def update_output(n_clicks,ntc, tolerancija, betta, btolerancija):
+def update_table(n_clicks,ntc, tolerancija, betta, btolerancija):
     config['resistor']['resistance']        =ntc
     config['resistor']['tolerance']         =tolerancija
     config['resistor']['betta']             =betta
     config['resistor']['bettaTolerance']    =btolerancija
-    return [generate_table(config)]
+    return [generate_table_from_yaml(config)]
 
 
 
