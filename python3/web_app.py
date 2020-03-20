@@ -20,7 +20,7 @@ else:
     import simulation_adc_daq as adc_daq
 
 
-# external_stylesheets = ["https://codepen.io/chriddyp/pen/bWLwgP.css"]
+external_stylesheets =dbc.themes.BOOTSTRAP
 
 app = dash.Dash(__name__)
 app.config["suppress_callback_exceptions"] = False
@@ -98,7 +98,7 @@ def dict_to_markdown(dict):
 def generate_table_from_yaml(dic):
     html_table_return = []
     for k, v in dic.items():
-        if isinstance(dic, dict):
+        if isinstance(v, dict):
             html_table_return.append(
                 html.Tr(
                     [
@@ -302,13 +302,13 @@ def tab1_mejerne_komponente():
         ),
         html.Label(
             [
-                "Koliko mjerenja prema intervalu (sekundi)",
+                "Koliko mjerenja(1. kucica) prema intervalu (2 kucica, sekundi) ",
                 dcc.Input(
                     id="input_interval_number",
                     value=0,
                     type="number",
                     step=1,
-                    min=1,
+                    min=0,
                     max=500,
                     inputMode="numeric",
                     required=True,
@@ -319,16 +319,18 @@ def tab1_mejerne_komponente():
                     value=0,
                     type="number",
                     step=1,
-                    min=1,
+                    min=0,
                     max=500,
                     inputMode="numeric",
                     required=True,
                     disabled=False,
                 ),
                 html.Button(id="interval-button", n_clicks=0, children="set interval"),
-            ]
+                html.Textarea('prva kucica oznacava broj mjerenja koja ce se napraviti \na druga kucica koliki je interval izmedju 2 uzastopna mjerenja \nkada zavrse sva mjerenja pritisni STOP gumb, (fix this later)')
+            ],
+            style={'display':'grid'}
         ),
-        html.Button(id="start-button", disabled=False, n_clicks=0, children="start"),
+        html.Button(id="start-button", disabled=False, n_clicks=0, children="START jedno mjerenje"),
         dcc.Graph(id="output-state"),
     ]
 
