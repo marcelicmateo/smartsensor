@@ -20,7 +20,6 @@ else:
     import simulation_adc_daq as adc_daq
 
 
-external_stylesheets =dbc.themes.BOOTSTRAP
 
 app = dash.Dash(__name__)
 app.config["suppress_callback_exceptions"] = False
@@ -61,7 +60,6 @@ else:
 def generate_output_table(log, velicina):
     global index_log
     l = df([log])
-    print(index_log)
     l.to_csv(LOG_DAT, mode="a", sep=";", index=False, header=False)
     index_log = index_log + 1
     LOG_MJERENJA[index_log] = log
@@ -281,6 +279,7 @@ def tab1_mejerne_komponente():
                     ),
                     value=list(config.get("adc").get("sps_zeff").keys())[0],
                     clearable=False,
+                    searchable=False,
                 ),
             ]
         ),

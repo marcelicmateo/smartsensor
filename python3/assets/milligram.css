@@ -258,7 +258,7 @@ select:focus {
 }
 
 textarea {
-  min-height: 6.5rem;
+  min-height: 10rem;
 }
 
 label,
@@ -267,6 +267,7 @@ legend {
   font-size: 1.6rem;
   font-weight: 700;
   margin-bottom: .5rem;
+  width: max-content;
 }
 
 fieldset {
