@@ -13,6 +13,8 @@ import dash_bootstrap_components as dbc
 from pandas import DataFrame as df
 from pandas import read_csv
 from os.path import exists
+import plotly.express as px
+import plotly.graph_objects as go
 
 if exists("/sys/firmware/devicetree/base/model"):
     import adc_daq
@@ -22,6 +24,7 @@ else:
 
 app = dash.Dash(__name__)
 app.config["suppress_callback_exceptions"] = False
+app.title = "PYpi"
 server = app.server
 
 LISTA_MJERENIH_PODATAKA = [
@@ -360,11 +363,16 @@ def tab3_povratne_vrijednosti_kruga():
         ),
         dash_table.DataTable(
             id="table_calculated_values",
-            columns=[{"name": i, "id": i} for i in (LISTA_MJERENIH_PODATAKA)],
+            columns=[
+                {"name": i, "id": i, "selectable": True}
+                for i in (LISTA_MJERENIH_PODATAKA)
+            ],
             editable=True,
             row_selectable="single",
+            column_selectable="multi",
         ),
         html.Div(id="output_display_selected_data"),
+        dcc.Graph(id="output_display_column"),
     ]
 
 
@@ -378,6 +386,7 @@ app.layout = html.Div(
             n_intervals=0,
             max_intervals=0,
         ),
+        html.Pre(id="kek"),
         dcc.Tabs(
             id="tabs",
             children=[
@@ -541,6 +550,24 @@ def prikaz_pojedinog_mjerenja_iz_tablice(K, V):
     if K is None or V is None or V == []:
         raise PreventUpdate
     return generate_table_from_yaml(K[V[0]])
+
+
+@app.callback(
+    Output("output_display_column", "figure"),
+    [
+        Input("table_calculated_values", "derived_viewport_selected_columns"),
+        Input("table_calculated_values", "derived_viewport_data"),
+    ],
+)
+def graf_selected_columns(sel, data):
+    if data is None or sel is None or sel == []:
+        raise PreventUpdate
+    data2 = df(data)
+    fig = go.Figure()
+    x_axis = list(data2.get("Timestamp"))
+    for s in sel:
+        fig.add_trace(go.Scatter(x=x_axis, y=list(data2.get(s))))
+    return fig
 
 
 if __name__ == "__main__":
