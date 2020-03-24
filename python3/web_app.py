@@ -20,7 +20,6 @@ else:
     import simulation_adc_daq as adc_daq
 
 
-
 app = dash.Dash(__name__)
 app.config["suppress_callback_exceptions"] = False
 server = app.server
@@ -28,7 +27,7 @@ server = app.server
 LISTA_MJERENIH_PODATAKA = [
     "Timestamp",
     "Napon NTC",
-    "std NTC",
+    "Napon std NTC",
     "Napon SHUNT",
     "std SHUNT",
     "Omjer napona sr. vr.",
@@ -38,6 +37,7 @@ LISTA_MJERENIH_PODATAKA = [
     "Napon SHUNT[V]",
     "std SHUNT [V]",
     "Otpor",
+    "otpor std NTC",
     "Utjecaj tolerancije shunta",
     "Temperatura izracunata polinomom",
     "STD Temperature polinomom",
@@ -49,13 +49,12 @@ LISTA_MJERENIH_PODATAKA = [
 LOG_DAT = "log_mjerenja6.csv"
 
 if not exists(LOG_DAT):
-    df(columns=LISTA_MJERENIH_PODATAKA).to_csv(LOG_DAT, index=True, sep=";")
+    df(columns=LISTA_MJERENIH_PODATAKA).to_csv(LOG_DAT, index=False, sep=";")
     index_log = 0
     LOG_MJERENJA = {}
 else:
     LOG_MJERENJA = read_csv(LOG_DAT, sep=";").to_dict("index")
     index_log = len(LOG_MJERENJA) - 1
-
 
 
 
@@ -326,11 +325,18 @@ def tab1_mejerne_komponente():
                     disabled=False,
                 ),
                 html.Button(id="interval-button", n_clicks=0, children="set interval"),
-                html.Textarea('prva kucica oznacava broj mjerenja koja ce se napraviti \na druga kucica koliki je interval izmedju 2 uzastopna mjerenja \nkada zavrse sva mjerenja pritisni STOP gumb, (fix this later)')
+                html.Textarea(
+                    "prva kucica oznacava broj mjerenja koja ce se napraviti \na druga kucica koliki je interval izmedju 2 uzastopna mjerenja \nkada zavrse sva mjerenja pritisni STOP gumb, (fix this later)"
+                ),
             ],
-            style={'display':'grid'}
+            style={"display": "grid"},
         ),
-        html.Button(id="start-button", disabled=False, n_clicks=0, children="START jedno mjerenje"),
+        html.Button(
+            id="start-button",
+            disabled=False,
+            n_clicks=0,
+            children="START jedno mjerenje",
+        ),
         dcc.Graph(id="output-state"),
     ]
 
@@ -421,20 +427,17 @@ def periodic_update_toogle(n, disable, interval_time, value):
         not disable,
     )
 
-#channels=[[],[]]
+
+# channels=[[],[]]
 # graf raw values of ntc and shunt
 @app.callback(
     [Output("trigger_adc_got_values", "children")],
-    [Input("start-button", "n_clicks"), 
-    Input("interval_uzoraka", "n_intervals")],
-    [
-        State("number_of_samples", "value"),
-        State("sps", "value"),
-    ],
+    [Input("start-button", "n_clicks"), Input("interval_uzoraka", "n_intervals")],
+    [State("number_of_samples", "value"), State("sps", "value"),],
 )
 def get_adc_values_calculate_stuff(n_clicks, n_intervals, number_of_samples, sps):
-    #print(n_clicks, n_intervals)
-    #print(number_of_samples is None or n_intervals == 0 and n_clicks == 0)
+    # print(n_clicks, n_intervals)
+    # print(number_of_samples is None or n_intervals == 0 and n_clicks == 0)
     if number_of_samples is None or n_intervals == 0 and n_clicks == 0:
         raise PreventUpdate
 
@@ -448,7 +451,7 @@ def get_adc_values_calculate_stuff(n_clicks, n_intervals, number_of_samples, sps
         kanali=channels,
         zeff=config.get("adc").get("sps_zeff").get(sps),
     )
-    df([log]).to_csv(LOG_DAT, mode="a", sep=";", index=index_log, header=False)
+    df([log]).to_csv(LOG_DAT, mode="a", sep=";", index=False, header=False)
 
     LOG_MJERENJA[index_log] = log
 
@@ -471,6 +474,7 @@ def save_button_disable_enable(*args):
         Bool -- diables or enables button
     """
     return ([False], [True])[None in args]
+
 
 @app.callback(
     [Output("component_table", "children")],
@@ -504,14 +508,20 @@ def update_table(n_clicks, ntc, tolerancija, betta, btolerancija):
     config["resistor"]["bettaTolerance"] = btolerancija
     return [generate_table_from_yaml(config)]
 
-@app.callback(Output('table_calculated_values','data')
-,[           Input('trigger_adc_got_values','children')
-, Input('input_velicina_tablice', 'value')]
+
+@app.callback(
+    Output("table_calculated_values", "data"),
+    [
+        Input("trigger_adc_got_values", "children"),
+        Input("input_velicina_tablice", "value"),
+    ],
 )
 def generate_output_table(triger, velicina):
     return [
-        LOG_MJERENJA.get(i, {}) for i in list(range(index_log - velicina, index_log, 1))
+        LOG_MJERENJA.get(i, {})
+        for i in list(range(index_log - velicina + 1, index_log + 1, 1))
     ]
+
 
 if __name__ == "__main__":
     # print(adc_daq.adc_daq(100,'ADS1256_3750SPS'))
