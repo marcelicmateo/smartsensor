@@ -49,7 +49,7 @@ LISTA_MJERENIH_PODATAKA = [
 LOG_DAT = "log_mjerenja6.csv"
 
 if not exists(LOG_DAT):
-    df(columns=LISTA_MJERENIH_PODATAKA).to_csv(LOG_DAT, index=False, sep=";")
+    df(columns=LISTA_MJERENIH_PODATAKA).to_csv(LOG_DAT, index=True, sep=";")
     index_log = 0
     LOG_MJERENJA = {}
 else:
@@ -57,15 +57,6 @@ else:
     index_log = len(LOG_MJERENJA) - 1
 
 
-def generate_output_table(log, velicina):
-    global index_log
-    l = df([log])
-    l.to_csv(LOG_DAT, mode="a", sep=";", index=False, header=False)
-    index_log = index_log + 1
-    LOG_MJERENJA[index_log] = log
-    return [
-        LOG_MJERENJA.get(i, {}) for i in list(range(index_log - velicina, index_log, 1))
-    ]
 
 
 with open("config.yaml") as f:
@@ -77,6 +68,16 @@ def generate_table_from_dict(dic):
 
 
 def get_adc_raw_values(sps="ADS1256_3750SPS", number_of_samples=100):
+    """Function to get adc raw values
+    
+    Keyword Arguments:
+        sps {str} -- string describing sample speed of adc
+        must be of format 'ADS1256_{sps}SPS' (default: {"ADS1256_3750SPS"})
+        number_of_samples {int} -- number of consecutive samples to take per one channel of adc  (default: {100})
+    
+    Returns:
+        numpy.array(dtype=int32) -- dimensions [2][number_of_samples]
+    """
     return adc_daq.adc_daq(number_of_samples=number_of_samples, sps=sps)
 
 
@@ -360,7 +361,8 @@ def tab3_povratne_vrijednosti_kruga():
 
 app.layout = html.Div(
     children=[
-        html.H1("Wellkome"),
+        html.Div(id="trigger_adc_got_values", style={"visibility": "hidden",}),
+        html.H1("Wellkome, kekono"),
         dcc.Interval(
             id="interval_uzoraka",
             interval=2 * 1000,  # in milliseconds 5 min
@@ -419,41 +421,38 @@ def periodic_update_toogle(n, disable, interval_time, value):
         not disable,
     )
 
-
+#channels=[[],[]]
 # graf raw values of ntc and shunt
 @app.callback(
-    [Output("output-state", "figure"), Output("table_calculated_values", "data")],
-    [Input("start-button", "n_clicks"), Input("interval_uzoraka", "n_intervals")],
+    [Output("trigger_adc_got_values", "children")],
+    [Input("start-button", "n_clicks"), 
+    Input("interval_uzoraka", "n_intervals")],
     [
         State("number_of_samples", "value"),
         State("sps", "value"),
-        State("input_velicina_tablice", "value"),
     ],
 )
-def update_output(n_clicks, n_intervals, number_of_samples, sps, velicina):
+def get_adc_values_calculate_stuff(n_clicks, n_intervals, number_of_samples, sps):
+    #print(n_clicks, n_intervals)
+    #print(number_of_samples is None or n_intervals == 0 and n_clicks == 0)
     if number_of_samples is None or n_intervals == 0 and n_clicks == 0:
         raise PreventUpdate
 
-    k = get_adc_raw_values(number_of_samples=number_of_samples, sps=sps)
-    i = obrada(
+    channels = get_adc_raw_values(number_of_samples=number_of_samples, sps=sps)
+
+    global index_log
+    index_log = index_log + 1
+
+    log = obrada(
         config={"resistor": config.get("resistor"), "shunt": config.get("shunt")},
-        kanali=k,
+        kanali=channels,
         zeff=config.get("adc").get("sps_zeff").get(sps),
     )
-    return (
-        {
-            "data": [
-                {"y": divide(k[0], numpy.max(k[0])), "name": "raw NTC voltage"},
-                {"y": divide(k[1], numpy.max(k[1])), "name": "raw shunt voltage"},
-            ],
-            "layout": {
-                "title": "Raw voltage values",
-                "xaxis": {"title": "number of samples taken"},
-                "yaxis": {"title": "voltage [V], in raw integer values"},
-            },
-        },
-        generate_output_table(i, velicina),
-    )
+    df([log]).to_csv(LOG_DAT, mode="a", sep=";", index=index_log, header=False)
+
+    LOG_MJERENJA[index_log] = log
+
+    return (True,)
 
 
 @app.callback(
@@ -466,8 +465,12 @@ def update_output(n_clicks, n_intervals, number_of_samples, sps, velicina):
     ],
 )
 def save_button_disable_enable(*args):
+    """Disables 'SAVE' button if invalid input
+    
+    Returns:
+        Bool -- diables or enables button
+    """
     return ([False], [True])[None in args]
-
 
 @app.callback(
     [Output("component_table", "children")],
@@ -480,12 +483,35 @@ def save_button_disable_enable(*args):
     ],
 )
 def update_table(n_clicks, ntc, tolerancija, betta, btolerancija):
+    """Update table with new values
+    Values are selected by user and only updated 
+    when "SAVE" button is presed/activated.
+    
+    
+    Arguments:
+        n_clicks {int} -- Triger for save function
+        ntc {int} -- new value of NTC resistor
+        tolerancija {int} -- value of NTC resistor tolerance in %
+        betta {int} -- new value of NTC betta factor
+        btolerancija {int} -- new tolerance of betta [%]
+    
+    Returns:
+        Html.Table -- generated html table element
+    """
     config["resistor"]["resistance"] = ntc
     config["resistor"]["tolerance"] = tolerancija
     config["resistor"]["betta"] = betta
     config["resistor"]["bettaTolerance"] = btolerancija
     return [generate_table_from_yaml(config)]
 
+@app.callback(Output('table_calculated_values','data')
+,[           Input('trigger_adc_got_values','children')
+, Input('input_velicina_tablice', 'value')]
+)
+def generate_output_table(triger, velicina):
+    return [
+        LOG_MJERENJA.get(i, {}) for i in list(range(index_log - velicina, index_log, 1))
+    ]
 
 if __name__ == "__main__":
     # print(adc_daq.adc_daq(100,'ADS1256_3750SPS'))
