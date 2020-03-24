@@ -530,7 +530,7 @@ table {
 td,
 th {
   border-bottom: 0.1rem solid #535252;
-  padding: .1rem .1rem;
+  padding: .2rem 3rem;
   padding-right: .2rem;
   text-align: left;
 }

@@ -25,6 +25,7 @@ app.config["suppress_callback_exceptions"] = False
 server = app.server
 
 LISTA_MJERENIH_PODATAKA = [
+    "N",
     "Timestamp",
     "Napon NTC",
     "Napon std NTC",
@@ -55,7 +56,6 @@ if not exists(LOG_DAT):
 else:
     LOG_MJERENJA = read_csv(LOG_DAT, sep=";").to_dict("index")
     index_log = len(LOG_MJERENJA) - 1
-
 
 
 with open("config.yaml") as f:
@@ -360,8 +360,11 @@ def tab3_povratne_vrijednosti_kruga():
         ),
         dash_table.DataTable(
             id="table_calculated_values",
-            columns=[{"name": i, "id": i} for i in LISTA_MJERENIH_PODATAKA],
+            columns=[{"name": i, "id": i} for i in (LISTA_MJERENIH_PODATAKA)],
+            editable=True,
+            row_selectable="single",
         ),
+        html.Div(id="output_display_selected_data"),
     ]
 
 
@@ -446,11 +449,13 @@ def get_adc_values_calculate_stuff(n_clicks, n_intervals, number_of_samples, sps
     global index_log
     index_log = index_log + 1
 
-    log = obrada(
+    l = obrada(
         config={"resistor": config.get("resistor"), "shunt": config.get("shunt")},
         kanali=channels,
         zeff=config.get("adc").get("sps_zeff").get(sps),
     )
+    log = {"N": index_log}
+    log.update(l)
     df([log]).to_csv(LOG_DAT, mode="a", sep=";", index=False, header=False)
 
     LOG_MJERENJA[index_log] = log
@@ -517,10 +522,25 @@ def update_table(n_clicks, ntc, tolerancija, betta, btolerancija):
     ],
 )
 def generate_output_table(triger, velicina):
-    return [
-        LOG_MJERENJA.get(i, {})
-        for i in list(range(index_log - velicina + 1, index_log + 1, 1))
-    ]
+    l = []
+    for i in list(range(index_log - velicina + 1, index_log + 1, 1)):
+        d = LOG_MJERENJA.get(i, {})
+        d.update({"N": i})
+        l.append(d)
+    return l
+
+
+@app.callback(
+    Output("output_display_selected_data", "children"),
+    [
+        Input("table_calculated_values", "derived_viewport_data"),
+        Input("table_calculated_values", "derived_viewport_selected_rows"),
+    ],
+)
+def prikaz_pojedinog_mjerenja_iz_tablice(K, V):
+    if K is None or V is None or V == []:
+        raise PreventUpdate
+    return generate_table_from_yaml(K[V[0]])
 
 
 if __name__ == "__main__":
