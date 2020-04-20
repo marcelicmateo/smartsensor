@@ -134,7 +134,7 @@ def generate_button_inputs():
                 "NTC RESISTANCE",
                 dcc.Input(
                     id="input_ntc_resistance",
-                    value=config.get("resistor").get("resistance"),
+                    value=config.get("database").get("ntcresistor").get("resistance"),
                     type="number",
                     step=1,
                     min=1,
@@ -149,7 +149,7 @@ def generate_button_inputs():
                 "NTC TOLERANCE",
                 dcc.Input(
                     id="input_ntc_resistance_tolerance",
-                    value=config.get("resistor").get("tolerance"),
+                    value=config.get("database").get("ntcresistor").get("tolerance"),
                     type="number",
                     step=1,
                     min=1,
@@ -164,7 +164,7 @@ def generate_button_inputs():
                 "NTC BETTA",
                 dcc.Input(
                     id="input_ntc_betta",
-                    value=config.get("resistor").get("betta"),
+                    value=config.get("database").get("ntcresistor").get("betta"),
                     type="number",
                     step=1,
                     min=1,
@@ -179,7 +179,9 @@ def generate_button_inputs():
                 "NTC BETTA TOLERANCE",
                 dcc.Input(
                     id="input_ntc_betta_tolerance",
-                    value=config.get("resistor").get("bettaTolerance"),
+                    value=config.get("database")
+                    .get("ntcresistor")
+                    .get("bettaTolerance"),
                     type="number",
                     step=1,
                     min=1,
@@ -233,7 +235,13 @@ def tab1_mejerne_komponente():
     return [
         html.Div(
             children=[
-                html.H2("Vrijednosti mejernog kruga"),
+                html.H6("Demonstraing remote control"),
+                dbc.Row(
+                    children=[
+                        dbc.Col(html.H4("Working configuration")),
+                        dbc.Col(html.Button("Change working configuration")),
+                    ]
+                ),
                 html.Table(
                     id="default_values_resistance",
                     children=[
@@ -251,17 +259,39 @@ def tab1_mejerne_komponente():
                         html.Tr(
                             [
                                 html.Td("Ntc"),
-                                html.Td(config.get("resistor").get("resistance")),
-                                html.Td(config.get("resistor").get("tolerance")),
-                                html.Td(config.get("resistor").get("betta")),
-                                html.Td(config.get("resistor").get("bettaTolerance")),
+                                html.Td(
+                                    config.get("database")
+                                    .get("ntcresistor")
+                                    .get("resistance")
+                                ),
+                                html.Td(
+                                    config.get("database")
+                                    .get("ntcresistor")
+                                    .get("tolerance")
+                                ),
+                                html.Td(
+                                    config.get("database")
+                                    .get("ntcresistor")
+                                    .get("betta")
+                                ),
+                                html.Td(
+                                    config.get("database")
+                                    .get("ntcresistor")
+                                    .get("bettaTolerance")
+                                ),
                             ]
                         ),
                         html.Tr(
                             [
                                 html.Td("Shunt"),
-                                html.Td(config.get("shunt").get("resistance")),
-                                html.Td(config.get("shunt").get("tolerance")),
+                                html.Td(
+                                    config.get("database")
+                                    .get("shunt")
+                                    .get("resistance")
+                                ),
+                                html.Td(
+                                    config.get("database").get("shunt").get("tolerance")
+                                ),
                             ]
                         ),
                     ],
@@ -277,10 +307,11 @@ def tab1_mejerne_komponente():
                 "Sampling speed of adc",
                 dcc.Dropdown(
                     id="sps",
-                    options=generate_dropdown_dictionary_VALUE_EQ_KEYS(
-                        config.get("adc").get("sps_zeff")
-                    ),
-                    value=list(config.get("adc").get("sps_zeff").keys())[0],
+                    options=[
+                        {"label": i, "value": i}
+                        for i in config.get("database").get("adc").get("samplingSpeed")
+                    ],
+                    value=config.get("database").get("adc").get("samplingSpeed")[0],
                     clearable=False,
                     searchable=False,
                 ),
@@ -379,7 +410,10 @@ def tab3_povratne_vrijednosti_kruga():
 app.layout = html.Div(
     children=[
         html.Div(id="trigger_adc_got_values", style={"visibility": "hidden",}),
-        html.H1("Wellkome, kekono"),
+        html.H1("Wellkome"),
+        html.H3(
+            "Koncept of Smart sensor based on temperature measurement with NTC resistor"
+        ),
         dcc.Interval(
             id="interval_uzoraka",
             interval=2 * 1000,  # in milliseconds 5 min
@@ -391,7 +425,7 @@ app.layout = html.Div(
             id="tabs",
             children=[
                 dcc.Tab(
-                    label="Mjerni krug", children=tab1_mejerne_komponente()
+                    label="User Dashboard", children=tab1_mejerne_komponente()
                 ),  # end tab 1
                 dcc.Tab(
                     label="vrijednosti komponenti", children=tab2_tablica_komponenti()
@@ -459,9 +493,12 @@ def get_adc_values_calculate_stuff(n_clicks, n_intervals, number_of_samples, sps
     index_log = index_log + 1
 
     l = obrada(
-        config={"resistor": config.get("resistor"), "shunt": config.get("shunt")},
+        config={
+            "ntcresistor": config.get("database").get("ntcresistor"),
+            "shunt": config.get("database").get("shunt"),
+        },
         kanali=channels,
-        zeff=config.get("adc").get("sps_zeff").get(sps),
+        zeff=config.get("database").get("adc").get("sps_zeff").get(sps),
     )
     log = {"N": index_log}
     log.update(l)
@@ -516,10 +553,10 @@ def update_table(n_clicks, ntc, tolerancija, betta, btolerancija):
     Returns:
         Html.Table -- generated html table element
     """
-    config["resistor"]["resistance"] = ntc
-    config["resistor"]["tolerance"] = tolerancija
-    config["resistor"]["betta"] = betta
-    config["resistor"]["bettaTolerance"] = btolerancija
+    config["database"]["ntcresistor"]["resistance"] = ntc
+    config["database"]["ntcresistor"]["tolerance"] = tolerancija
+    config["database"]["ntcresistor"]["betta"] = betta
+    config["database"]["ntcresistor"]["bettaTolerance"] = btolerancija
     return [generate_table_from_yaml(config)]
 
 
