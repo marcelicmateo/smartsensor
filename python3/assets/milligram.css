@@ -449,9 +449,9 @@ input[type='radio'] {
   .row {
     flex-direction: row;
     margin-left: -1.0rem;
-    width: calc(100% + 2.0rem);
+    width: auto;
     margin: inherit;
-    justify-content: space-between;
+    flex-wrap: wrap;
   }
   .row .column {
     margin-bottom: inherit;
@@ -618,5 +618,6 @@ img {
 .float-right {
   float: right;
 }
+
 
 /*# sourceMappingURL=milligram.css.map */

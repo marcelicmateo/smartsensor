@@ -10,13 +10,13 @@ def obrada(config, kanali, zeff):
         datetime.timezone(datetime.timedelta(hours=+1))
     ).strftime("%Y-%m-%d %H:%M:%S")
 
-    r_ntc_25 = config.get("resistor").get("resistance")
-    r_ntc_tolerance = config.get("resistor").get("tolerance")
-    r_ntc_betta = config.get("resistor").get("betta")
-    r_ntc_betta_tolerance = config.get("resistor").get("bettaTolerance")
+    r_ntc_25 = config.get("ntcresistance")
+    r_ntc_tolerance = config.get("ntctolerance")
+    r_ntc_betta = config.get("betta")
+    r_ntc_betta_tolerance = config.get("bettatolerance")
 
-    r_shunt = config.get("shunt").get("resistance")
-    r_shunt_tolerance = config.get("shunt").get("tolerance")
+    r_shunt = config.get("shuntresistance")
+    r_shunt_tolerance = config.get("shunttolerance")
     temperatura_25 = 25 + 273.15
 
     r = numpy.divide(kanali[0], kanali[1])

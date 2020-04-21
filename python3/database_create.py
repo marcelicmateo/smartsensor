@@ -59,6 +59,9 @@ class activeConfiguration(Base):
     powerSuply = Column(String, ForeignKey("powersuply.id"))
     adc = Column(String, ForeignKey("adc.id"))
     refVoltage = Column(String, ForeignKey("refvoltage.id"))
+    numberofsamples = Column(Integer)
+    samplingspeed = Column(String)
+    period = Column(Integer)
 
 
 def populate_database(Base, engine):
@@ -86,11 +89,17 @@ def populate_database(Base, engine):
 
 
 def make_database(Base, engine):
-    return Base.metadata.create_all(engine)
+    Base.metadata.create_all(engine)
+    return Base
 
 
-if __name__ == "__main__":
+def main():
     engine = create_engine("sqlite:///sqlalchemy_example.db")
     if not database_exists(engine.url):
         make_database(Base, engine)
         populate_database(Base, engine)
+    return engine
+
+
+if __name__ == "__main__":
+    main()
