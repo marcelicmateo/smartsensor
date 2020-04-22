@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -328,8 +329,22 @@ def user_dashboard():
                 dbc.Row(
                     children=html.Div(make_tables_from_active_conf_in_database(engine))
                 ),
+                dbc.Row(
+                    children=html.Div(
+                        id="new_config",
+                        children=make_new_tables_from_active_conf_in_database(engine),
+                    )
+                ),
             ]
         ),  # end div with tables
+        html.Div(
+            html.P(
+                id="measured_temperature_and_timestamp",
+                children=[
+                    "Measured temperature: {} {} @ {}".format(None, "\u2103", None)
+                ],
+            ),
+        ),
         dcc.Graph(id="output-state"),
     ]
 
@@ -440,7 +455,11 @@ import plotly.express as px
 
 
 @app.callback(
-    [Output("output-state", "figure")], [Input("trigger_adc_got_values", "children")]
+    [
+        Output("output-state", "figure"),
+        Output("measured_temperature_and_timestamp", "children"),
+    ],
+    [Input("trigger_adc_got_values", "children")],
 )
 def graf_temperature(triger):
     # fig = go.Figure()
@@ -457,7 +476,16 @@ def graf_temperature(triger):
         title="Temperatura",
     )
     # LOG_MJERENJA[index_log]
-    return [fig]
+    return [
+        fig,
+        dcc.Markdown(
+            "Measured temperature: **{:.2f}** {} @ **{}**".format(
+                LOG_MJERENJA.get(index_log).get("Temperatura izracunata polinomom"),
+                "\u2103",
+                LOG_MJERENJA.get(index_log).get("Timestamp", "error"),
+            )
+        ),
+    ]
 
 
 @app.callback(
