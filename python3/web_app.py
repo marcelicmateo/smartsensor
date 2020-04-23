@@ -12,18 +12,30 @@ import numpy
 import json
 import dash_bootstrap_components as dbc
 from pandas import DataFrame as df
-from pandas import read_csv
+from pandas import read_csv, read_sql_table
 from os.path import exists
 import plotly.express as px
 import plotly.graph_objects as go
 from sqlalchemy import create_engine
-import database_create
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy import text
 
 
-engine = database_create.main()
+def IMPORT_EVERYTHING():
+    DB = {}
+    engine = create_engine("sqlite:///sqlalchemy_example.db")
+    with open("config.yaml") as c:
+        config = yaml.safe_load(c)
+    for key in config.get("database").keys():
+        DB[key] = read_sql_table(key, engine)
+    DB["activeconfiguration"] = (
+        DB.get("activeconfiguration").iloc[[-1]].reset_index(drop=True)
+    )
+    # print(DB.get("activeconfiguration"))
+
+    return DB
+
 
 if exists("/sys/firmware/devicetree/base/model"):
     import adc_daq
@@ -32,7 +44,7 @@ else:
 
 
 app = dash.Dash(__name__)
-app.config["suppress_callback_exceptions"] = False
+app.config["suppress_callback_exceptions"] = True
 app.title = "PYpi"
 server = app.server
 
@@ -167,7 +179,8 @@ def tab2_tablica_komponenti():
 from sqlalchemy.orm import relationship, sessionmaker
 
 
-def make_tables_from_active_conf_in_database(engine):
+def make_tables_from_active_conf_in_database():
+    engine = create_engine("sqlite:///sqlalchemy_example.db")
     table_list = []
     global config
     connection = engine.connect()
@@ -208,7 +221,9 @@ def make_tables_from_active_conf_in_database(engine):
         ],
         style_table={"padding-right": "0.1em", "padding-down": "0.5em"},
     )
-    t = text("SELECT id,resistance,tolerance,betta,bettaTolerance FROM  ntcresistor")
+    t = text(
+        "SELECT ntcresistor.id,resistance,tolerance,betta,bettaTolerance FROM  ntcresistor join activeconfiguration where activeconfiguration.ntcresistor = ntcresistor.id"
+    )
     result = connection.execute(t).fetchall()
     config["ntcresistance"] = result[-1][1]
     config["ntctolerance"] = result[-1][2]
@@ -231,7 +246,9 @@ def make_tables_from_active_conf_in_database(engine):
         ],
         style_table={"padding-right": "0.1em"},
     )
-    t = text("SELECT id,resistance,tolerance FROM  shunt")
+    t = text(
+        "SELECT shunt.id,resistance,tolerance FROM  shunt join activeconfiguration where activeconfiguration.shunt = shunt.id"
+    )
     result = connection.execute(t).fetchall()
     config["shuntresistance"] = result[-1][1]
     config["shunttolerance"] = result[-1][2]
@@ -246,7 +263,9 @@ def make_tables_from_active_conf_in_database(engine):
         ],
         style_table={"padding-right": "0.1em"},
     )
-    t = text("SELECT id, voltage, settlingtime FROM  powersuply")
+    t = text(
+        "SELECT powersuply.id, voltage, settlingtime FROM  powersuply join activeconfiguration where activeconfiguration.powersuply = powersuply.id"
+    )
     result = connection.execute(t).fetchall()
     table_four = dash_table.DataTable(
         id="table_powersuply",
@@ -259,7 +278,9 @@ def make_tables_from_active_conf_in_database(engine):
         ],
         style_table={"padding-right": "0.1em"},
     )
-    t = text("SELECT id, samplingspeed, impedance, clockFreq FROM  adc")
+    t = text(
+        "SELECT adc.id, adc.samplingspeed, adc.impedance, clockFreq FROM  adc join activeconfiguration where activeconfiguration.adc = adc.id"
+    )
     result = connection.execute(t).fetchall()
     config["zeff"] = result[-1][2].split(",")[0]
     table_five = dash_table.DataTable(
@@ -274,7 +295,9 @@ def make_tables_from_active_conf_in_database(engine):
         ],
         style_table={"padding-right": "0.1em"},
     )
-    t = text("SELECT id, voltage FROM  refVoltage")
+    t = text(
+        "SELECT refVoltage.id, voltage FROM  refVoltage join activeconfiguration where activeconfiguration.refVoltage = refVoltage.id"
+    )
     result = connection.execute(t).fetchall()
     table_six = dash_table.DataTable(
         id="table_six",
@@ -289,6 +312,7 @@ def make_tables_from_active_conf_in_database(engine):
         ],
         style_table={"padding-right": "0.1em"},
     )
+    connection.close()
     return (
         dbc.Row(dbc.Col(table_one)),
         dbc.Row(html.Button("Open details", id="collapse-button")),
@@ -307,7 +331,7 @@ def make_tables_from_active_conf_in_database(engine):
             id="collapse",
             className="colapse_div",
             hidden=True,
-            style={},
+            style={"width": "auto"},
         ),
     )
 
@@ -322,17 +346,24 @@ def user_dashboard():
                 dbc.Row(
                     children=[
                         dbc.Col(html.H4("Working configuration")),
-                        dbc.Col(html.Button("Change working configuration")),
+                        dbc.Col(
+                            html.Button(
+                                id="button_new_config",
+                                children="Change working configuration",
+                            ),
+                        ),
                     ],
                     style={"justify-content": "space-between"},
                 ),
                 dbc.Row(
-                    children=html.Div(make_tables_from_active_conf_in_database(engine))
+                    id="active_conf_div",
+                    children=html.Div(make_tables_from_active_conf_in_database()),
                 ),
                 dbc.Row(
                     children=html.Div(
                         id="new_config",
-                        children=make_new_tables_from_active_conf_in_database(engine),
+                        style={"border": "2px solid #000", "margins": "2px"},
+                        hidden=True,
                     )
                 ),
             ]
@@ -415,6 +446,17 @@ app.layout = html.Div(
     Output("collapse", "hidden"),
     [Input("collapse-button", "n_clicks")],
     [State("collapse", "hidden")],
+)
+def toggle_collapse(n, is_open):
+    if n:
+        return not is_open
+    return is_open
+
+
+@app.callback(
+    Output("collapse2", "hidden"),
+    [Input("collapse-button2", "n_clicks")],
+    [State("collapse2", "hidden")],
 )
 def toggle_collapse(n, is_open):
     if n:
@@ -535,6 +577,190 @@ def graf_selected_columns(sel, data):
     return fig
 
 
+@app.callback(
+    [
+        Output("new_config", "children"),
+        Output("new_config", "hidden"),
+        Output("button_new_config", "disabled"),
+    ],
+    [Input("button_new_config", "n_clicks")],
+    [State("new_config", "hidden"),],
+)
+def make_new_tables_from_active_conf_in_database(
+    n_clicks, hidden,
+):
+    # print("nkliks {}".format(n_clicks))
+    if n_clicks is None:
+        raise PreventUpdate
+    # print("nkliks {}".format(hidden))
+    columns = [
+        {"name": ["NEW CONFIGURATION", i], "id": i, "presentation": "dropdown",}
+        for i in DB.get("activeconfiguration").columns
+    ]
+    for i, n in enumerate(columns):
+        if n.get("id") == "numberofsamples" or n.get("id") == "period":
+            columns[i].pop("presentation")
+
+    table_one = dash_table.DataTable(
+        columns=columns,
+        data=DB.get("activeconfiguration").to_dict("records"),
+        merge_duplicate_headers=True,
+        style_table={"width": "99%"},
+        style_cell={"textAlign": "left"},
+        editable=True,
+        id="table_input_configuration",
+        dropdown={
+            "ntcresistor": {
+                "options": [
+                    {"label": i, "value": i} for i in DB.get("ntcresistor")["id"]
+                ]
+            },
+            "shunt": {
+                "options": [{"label": i, "value": i} for i in DB.get("shunt")["id"]]
+            },
+            "powersuply": {
+                "options": [
+                    {"label": i, "value": i} for i in DB.get("powersuply")["id"]
+                ]
+            },
+            "samplingspeed": {
+                "options": [
+                    {"label": i, "value": i}
+                    for i in DB.get("adc")["samplingSpeed"][0].split(",")
+                ]
+            },
+        },
+    )
+    table_two = dash_table.DataTable(
+        id="table_otput_ntc",
+        columns=[
+            {"name": ["NTC", i], "id": i, "presentation": "dropdown"}
+            for i in DB.get("ntcresistor").columns
+        ],
+        data=DB.get("ntcresistor")
+        .loc[
+            DB.get("ntcresistor")["id"]
+            == DB.get("activeconfiguration")["ntcresistor"][0]
+        ]
+        .to_dict("records"),
+        merge_duplicate_headers=True,
+        style_cell={"textAlign": "left"},
+    )
+    table_three = dash_table.DataTable(
+        id="table_otput_shunt",
+        columns=[{"name": ["SHUNT", i], "id": i,} for i in DB.get("shunt").columns],
+        data=DB.get("shunt")
+        .loc[DB.get("shunt")["id"] == DB.get("activeconfiguration")["shunt"][0]]
+        .to_dict("records"),
+        merge_duplicate_headers=True,
+        style_cell={"textAlign": "left"},
+    )
+    table_four = dash_table.DataTable(
+        id="table_otput_power",
+        columns=[
+            {"name": ["POWER", i], "id": i,} for i in DB.get("powersuply").columns
+        ],
+        data=DB.get("powersuply")
+        .loc[
+            DB.get("powersuply")["id"] == DB.get("activeconfiguration")["powersuply"][0]
+        ]
+        .to_dict("records"),
+        merge_duplicate_headers=True,
+        style_cell={"textAlign": "left"},
+    )
+    table_five = dash_table.DataTable(
+        columns=[{"name": i, "id": i,} for i in DB.get("adc").columns],
+        data=DB.get("adc")
+        .loc[DB.get("adc")["id"] == DB.get("activeconfiguration")["adc"][0]]
+        .to_dict("records"),
+    )
+    table_six = dash_table.DataTable(
+        columns=[{"name": i, "id": i,} for i in DB.get("refvoltage").columns],
+        data=DB.get("refvoltage")
+        .loc[
+            DB.get("refvoltage")["id"] == DB.get("activeconfiguration")["refvoltage"][0]
+        ]
+        .to_dict("records"),
+    )
+    # DB["activeconfiguration"] = d[0]
+
+    return (
+        (
+            dbc.Row(dbc.Col(table_one)),
+            dbc.Row(html.Button("Open details", id="collapse-button2")),
+            html.Div(
+                children=[
+                    dbc.Row(
+                        children=[
+                            dbc.Col(table_two),
+                            dbc.Col(table_three),
+                            dbc.Col(table_four),
+                            # dbc.Col(table_five),
+                            # dbc.Col(table_six),
+                        ],
+                    )
+                ],
+                id="collapse2",
+                className="colapse_div",
+                hidden=False,
+                style={"width": "auto"},
+            ),
+            html.Button(id="button_save_config", children="SAVE CONFIG",),
+        ),
+        not hidden,
+        hidden,
+    )
+
+
+@app.callback(
+    [Output("button_new_config", "n_clicks"), Output("active_conf_div", "children")],
+    [Input("button_save_config", "n_clicks"),],
+    [
+        State("table_input_configuration", "derived_virtual_data"),
+        State("button_new_config", "n_clicks"),
+    ],
+)
+def save_active_conf(n, data, k):
+    global DB
+    engine = create_engine("sqlite:///sqlalchemy_example.db")
+    if n is None or data is None:
+        raise PreventUpdate
+
+    DB["activeconfiguration"] = df(data[0], index=[0])
+    DB.get("activeconfiguration").drop(labels="id", axis=1, inplace=True)
+    DB.get("activeconfiguration").to_sql(
+        "activeconfiguration", engine, if_exists="append", index=False
+    )
+    DB = IMPORT_EVERYTHING()
+    return k + 1, html.Div(make_tables_from_active_conf_in_database())
+
+
+@app.callback(
+    [
+        Output("table_otput_ntc", "data"),
+        Output("table_otput_shunt", "data"),
+        Output("table_otput_power", "data"),
+    ],
+    [Input("table_input_configuration", "derived_virtual_data"),],
+)
+def change_config_dinamic(d):
+    if d is None:
+        raise PreventUpdate
+    global DB
+    return (
+        DB.get("ntcresistor")
+        .loc[DB.get("ntcresistor")["id"] == d[0].get("ntcresistor")]
+        .to_dict("records"),
+        DB.get("shunt")
+        .loc[DB.get("shunt")["id"] == d[0].get("shunt")]
+        .to_dict("records"),
+        DB.get("powersuply")
+        .loc[DB.get("powersuply")["id"] == d[0].get("powersuply")]
+        .to_dict("records"),
+    )
+
+
 if __name__ == "__main__":
+    DB = IMPORT_EVERYTHING()
     # print(adc_daq.adc_daq(100,'ADS1256_3750SPS'))
     app.run_server(debug=True)

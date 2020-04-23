@@ -56,7 +56,7 @@ def obrada(config, kanali, zeff):
         -1
     ) - 273.15
     end = process_time()
-    print("temperatura Exp = {}".format(end - start))
+    # print("temperatura Exp = {}".format(end - start))
     start = process_time()
     temperatura_e_std = (
         temperatura_25 ** 2
@@ -75,7 +75,7 @@ def obrada(config, kanali, zeff):
         )
     )
     end = process_time()
-    print("temperatura Exp std = {}".format(end - start))
+    # print("temperatura Exp std = {}".format(end - start))
     # aproksimacija temperature polinomom 3 reda
     A1 = 3.354016e-3
     B1 = 2.744032e-4
@@ -89,7 +89,7 @@ def obrada(config, kanali, zeff):
         + D1 * numpy.log(r_ntc / r_ntc_25) ** 3
     ) ** -1 - 273.15
     end = process_time()
-    print("temperatura polinom= {}".format(end - start))
+    # print("temperatura polinom= {}".format(end - start))
     start = process_time()
     temperatura_polinom_std = (
         numpy.sqrt(
@@ -113,7 +113,7 @@ def obrada(config, kanali, zeff):
         )
     )
     end = process_time()
-    print("temperatura polinom std = {}".format(end - start))
+    # print("temperatura polinom std = {}".format(end - start))
     U_ntc_mean = numpy.mean(kanali[0], dtype=numpy.float64)
     U_ntc_std = numpy.std(kanali[0], dtype=numpy.float64, ddof=1)
     U_shunt_mean = numpy.mean(kanali[1], dtype=numpy.float64)

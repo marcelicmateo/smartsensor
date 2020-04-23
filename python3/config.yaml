@@ -59,9 +59,9 @@ database:
   activeconfiguration:
     ntcresistor: *id_ntc
     shunt: *id_shunt
-    powerSuply: *id_power
+    powersuply: *id_power
     adc: *id_adc
-    refVoltage: *id_refvoltage
+    refvoltage: *id_refvoltage
     numberofsamples: 100
     samplingspeed: *def_speed
     period: 5

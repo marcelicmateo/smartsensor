@@ -299,6 +299,7 @@ input[type='radio'] {
   flex-direction: column;
   padding: 0;
   width: 100%;
+  flex-wrap: wrap;
 }
 
 .row.row-no-padding {
@@ -617,6 +618,11 @@ img {
 
 .float-right {
   float: right;
+}
+
+*[data-dash-is-loading="true"]{
+  visibility: unset;
+  background-color: rgba(170, 235, 228, 0.507);
 }
 
 

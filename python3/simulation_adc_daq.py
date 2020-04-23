@@ -6,6 +6,8 @@ from numpy import zeros, int32
 
 def adc_daq(number_of_samples=100, sps="ADS1256_3750SPS", gain="ADS1256_GAIN_1"):
 
+    # print(number_of_samples)
+
     channels = zeros([2, number_of_samples], dtype=int32)
 
     channels[0] = sample(range(1, 1000), number_of_samples)
