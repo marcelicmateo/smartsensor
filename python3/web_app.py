@@ -157,7 +157,11 @@ def tab2_tablica_komponenti():
                 dcc.Markdown(
                     """
                     ## Vrijednosti elemenata mjernog kruga
-                    BLA BLA BLA, jebene tablice
+                    
+                    Prikaz podataka koji se "tvornicki nalaze na senzoru.  
+                    TEDS - Transducer electronic data sheet, IEEE 1451   
+                    Standardizirana metoda spremanja podataka na senzor za kasniju 
+                    indentifikaciju, korekciju podataka i meta-podacima proizvodjaca.
                     """
                 ),
                 dbc.Row(
@@ -368,13 +372,32 @@ def user_dashboard():
                 ),
             ]
         ),  # end div with tables
-        html.Div(
-            html.P(
-                id="measured_temperature_and_timestamp",
-                children=[
-                    "Measured temperature: {} {} @ {}".format(None, "\u2103", None)
-                ],
-            ),
+        dbc.Row(
+            children=[
+                dbc.Col(
+                    html.P(
+                        id="measured_temperature_and_timestamp",
+                        children=[
+                            "Measured temperature: {} {} @ {}".format(
+                                None, "\u2103", None
+                            )
+                        ],
+                    )
+                ),
+                dbc.Col(
+                    dcc.RadioItems(
+                        id="izlaz_temperature",
+                        options=[
+                            {"label": u"Kelvin [K]", "value": "K"},
+                            {"label": u"Celsius [\u2103]", "value": "C"},
+                            {"label": u"Farenhajt [F]", "value": "F"},
+                        ],
+                        value="C",
+                        labelStyle={"display": "inline-block"},
+                    )
+                ),
+            ],
+            # style={"display": "inline-block"},
         ),
         dcc.Graph(id="output-state"),
     ]
@@ -475,7 +498,7 @@ def get_adc_values_calculate_stuff(n_intervals):
     # print(number_of_samples is None or n_intervals == 0 and n_clicks == 0)
     # if n_intervals == 0:
     #   raise PreventUpdate
-    print(n_intervals)
+    # print(n_intervals)
     channels = get_adc_raw_values(
         number_of_samples=config.get("number_of_samples"), sps=config.get("sps")
     )
