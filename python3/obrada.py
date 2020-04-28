@@ -19,6 +19,15 @@ def obrada(config, kanali, zeff):
     r_shunt_tolerance = config.get("shunttolerance")
     temperatura_25 = 25 + 273.15
 
+    print(
+        r_ntc_25,
+        r_ntc_tolerance,
+        r_ntc_betta,
+        r_ntc_betta_tolerance,
+        r_shunt,
+        r_shunt_tolerance,
+    )
+
     r = numpy.divide(kanali[0], kanali[1])
     r_mean = numpy.mean(r, dtype=numpy.float64)
     r_std = numpy.std(r, dtype=numpy.float64, ddof=1)

@@ -12,17 +12,14 @@ tmpfs /tmp/db tmpfs defaults,noatime,nosuid,size=100m 0 0
 
 ###
 
-29.1.2020
+28.04.2020
 ------------
-sudo pip3 install uwsgi 
-
 i pokrenut sa
 
-sudo uwsgi --plugin python,http --http=192.168.5.27:8080 --master --module web_app:server --processes 2
-
+uwsgi --plugin python,http --http :8080 --master --module web_app:server --processes 4 --enable-threads
 u direktoriju di je web_app
 
-http://192.168.5.27:8080/
+http://sensor.local:8080/
 adresa na kojoj se pokrene
 ####
 
@@ -35,4 +32,3 @@ bash skripta za napraviti py environmet
 source setup.sh
 
 ###
-
