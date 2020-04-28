@@ -37,6 +37,8 @@ def IMPORT_EVERYTHING():
     return DB
 
 
+DB = IMPORT_EVERYTHING()
+
 if exists("/sys/firmware/devicetree/base/model"):
     import adc_daq
 else:
@@ -784,6 +786,6 @@ def change_config_dinamic(d):
 
 
 if __name__ == "__main__":
-    DB = IMPORT_EVERYTHING()
+
     # print(adc_daq.adc_daq(100,'ADS1256_3750SPS'))
     app.run_server(debug=True)
