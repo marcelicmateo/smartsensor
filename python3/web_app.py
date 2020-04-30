@@ -36,6 +36,9 @@ def IMPORT_EVERYTHING():
 
     return DB
 
+DB = IMPORT_EVERYTHING()
+
+
 
 if exists("/sys/firmware/devicetree/base/model"):
     import adc_daq
@@ -499,6 +502,7 @@ def get_adc_values_calculate_stuff(n_intervals):
     # if n_intervals == 0:
     #   raise PreventUpdate
     # print(n_intervals)
+    print(config)
     channels = get_adc_raw_values(
         number_of_samples=config.get("number_of_samples"), sps=config.get("sps")
     )
@@ -616,6 +620,7 @@ def make_new_tables_from_active_conf_in_database(
     if n_clicks is None:
         raise PreventUpdate
     # print("nkliks {}".format(hidden))
+    global DB
     columns = [
         {"name": ["NEW CONFIGURATION", i], "id": i, "presentation": "dropdown",}
         for i in DB.get("activeconfiguration").columns
@@ -784,6 +789,5 @@ def change_config_dinamic(d):
 
 
 if __name__ == "__main__":
-    DB = IMPORT_EVERYTHING()
     # print(adc_daq.adc_daq(100,'ADS1256_3750SPS'))
     app.run_server(debug=True)
