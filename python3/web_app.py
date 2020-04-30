@@ -405,6 +405,11 @@ def user_dashboard():
             # style={"display": "inline-block"},
         ),
         dcc.Graph(id="output-state"),
+        html.Div(
+            id='raw',
+            children=[dcc.Graph(id='raw_graf')]
+        )
+
     ]
 
 
@@ -492,10 +497,12 @@ def toggle_collapse(n, is_open):
     return is_open
 
 
+from numpy import arange, divide, max
 # channels=[[],[]]
 # graf raw values of ntc and shunt
 @app.callback(
-    [Output("trigger_adc_got_values", "children")],
+    [Output("trigger_adc_got_values", "children"),
+    Output('raw_graf', 'figure')],
     [Input("interval_uzoraka", "n_intervals")],
 )
 def get_adc_values_calculate_stuff(n_intervals):
@@ -508,6 +515,16 @@ def get_adc_values_calculate_stuff(n_intervals):
     channels = get_adc_raw_values(
         number_of_samples=config.get("number_of_samples"), sps=config.get("sps")
     )
+    x=arange(0,config.get("number_of_samples")) 
+    max_n=max(channels[0])
+    max_s=max(channels[1])
+    y1=divide(channels[0],max_n)
+    y2=divide(channels[1],max_s)
+
+    fig = go.Figure(data=go.Scatter(x=x, y=y1, name='NTC'))
+    fig.add_trace(go.Scatter(x=x, y=y2, name="Shunt"))
+
+ 
 
     global index_log
     index_log = index_log + 1
@@ -519,7 +536,7 @@ def get_adc_values_calculate_stuff(n_intervals):
 
     LOG_MJERENJA[index_log] = log
 
-    return (True,)
+    return (True, fig)
 
 
 import plotly.express as px
@@ -791,9 +808,5 @@ def change_config_dinamic(d):
 
 
 if __name__ == "__main__":
-<<<<<<< HEAD
-=======
-
->>>>>>> aa133688e4b3b1c1cbd872a3e466c484ef690dee
     # print(adc_daq.adc_daq(100,'ADS1256_3750SPS'))
     app.run_server(debug=True)
