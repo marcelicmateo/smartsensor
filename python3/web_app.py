@@ -36,9 +36,6 @@ def IMPORT_EVERYTHING():
 
     return DB
 
-DB = IMPORT_EVERYTHING()
-
-
 
 DB = IMPORT_EVERYTHING()
 
@@ -190,9 +187,8 @@ from sqlalchemy.orm import relationship, sessionmaker
 
 def make_tables_from_active_conf_in_database():
     engine = create_engine("sqlite:///sqlalchemy_example.db")
-    table_list = []
-    global config
     connection = engine.connect()
+    global config
     t = text(
         "SELECT ntcresistor, shunt, powerSuply, adc, refVoltage, numberofsamples, samplingspeed, period FROM activeconfiguration"
     )
@@ -405,11 +401,7 @@ def user_dashboard():
             # style={"display": "inline-block"},
         ),
         dcc.Graph(id="output-state"),
-        html.Div(
-            id='raw',
-            children=[dcc.Graph(id='raw_graf')]
-        )
-
+        html.Div(id="raw", children=[dcc.Graph(id="raw_graf")]),
     ]
 
 
@@ -424,7 +416,7 @@ def tab3_povratne_vrijednosti_kruga():
                     type="number",
                     step=1,
                     min=1,
-                    max=10,
+                    max=1000,
                     inputMode="numeric",
                     required=True,
                 ),
@@ -439,6 +431,8 @@ def tab3_povratne_vrijednosti_kruga():
             editable=True,
             row_selectable="single",
             column_selectable="multi",
+            fixed_rows={"headers": True},
+            style_table={"height": 400},
         ),
         html.Div(id="output_display_selected_data"),
         dcc.Graph(id="output_display_column"),
@@ -498,11 +492,11 @@ def toggle_collapse(n, is_open):
 
 
 from numpy import arange, divide, max
+
 # channels=[[],[]]
 # graf raw values of ntc and shunt
 @app.callback(
-    [Output("trigger_adc_got_values", "children"),
-    Output('raw_graf', 'figure')],
+    [Output("trigger_adc_got_values", "children"), Output("raw_graf", "figure")],
     [Input("interval_uzoraka", "n_intervals")],
 )
 def get_adc_values_calculate_stuff(n_intervals):
@@ -511,20 +505,18 @@ def get_adc_values_calculate_stuff(n_intervals):
     # if n_intervals == 0:
     #   raise PreventUpdate
     # print(n_intervals)
-    print(config)
+    # print(config)
     channels = get_adc_raw_values(
         number_of_samples=config.get("number_of_samples"), sps=config.get("sps")
     )
-    x=arange(0,config.get("number_of_samples")) 
-    max_n=max(channels[0])
-    max_s=max(channels[1])
-    y1=divide(channels[0],max_n)
-    y2=divide(channels[1],max_s)
+    x = arange(0, config.get("number_of_samples"))
+    max_n = max(channels[0])
+    max_s = max(channels[1])
+    y1 = divide(channels[0], max_n)
+    y2 = divide(channels[1], max_s)
 
-    fig = go.Figure(data=go.Scatter(x=x, y=y1, name='NTC'))
+    fig = go.Figure(data=go.Scatter(x=x, y=y1, name="NTC"))
     fig.add_trace(go.Scatter(x=x, y=y2, name="Shunt"))
-
- 
 
     global index_log
     index_log = index_log + 1
