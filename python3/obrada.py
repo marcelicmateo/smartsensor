@@ -24,19 +24,21 @@ def obrada(config, kanali, zeff):
     r_std = numpy.std(r, dtype=numpy.float64, ddof=1)
 
     # r_ntc=
-    # {-Rs*Zeff*r/(Rs*r - Rs - Zeff)} r=Un/Us
-    r_ntc = -r_shunt * r_mean * zeff / (r_shunt * (r_mean - 1) - zeff)
+    # R_shunt*Zeff*r/(-R_shunt*r + R_shunt + Zeff)
+
+    r_ntc = r_mean * zeff *r_shunt / (r_shunt - r_mean * r_shunt + zeff)
+    #print(zeff, r_shunt, r_mean )
 
     # utjecaj shunta i omjera napona na std od ntc
-    # -Rs*Zeff*r*(1 - r)/(Rs*r - Rs - Zeff)**2 - Zeff*r/(Rs*r - Rs - Zeff)
-    r_ntc_std_rs = -r_shunt * zeff * r_mean * (1 - r_mean) / (
-        (r_shunt - 1) * r_mean - zeff
-    ) ** 2 - zeff * r_mean / ((r_mean - 1) * r_shunt - zeff)
+    #utjecaj omjera napona 
+    # R_shunt*Zeff*(R_shunt + Zeff)/(-R_shunt*r + R_shunt + Zeff)**2
+    r_ntc_std_rs = zeff*r_shunt * (r_shunt + zeff) / (r_shunt + zeff -r_mean *r_shunt )**2
 
-    # Rs**2*Zeff*r/(Rs*r - Rs - Zeff)**2 - Rs*Zeff/(Rs*r - Rs - Zeff)
-    r_ntc_std_r = r_shunt ** 2 * zeff * r_mean / (
-        (r_shunt - 1) * r_mean - zeff
-    ) ** 2 - zeff * r_shunt / ((r_mean - 1) * r_shunt - zeff)
+    #utjecaj shunta 
+    # Zeff**2*r/(-R_shunt*r + R_shunt + Zeff)**2
+
+    r_ntc_std_r = -zeff **2 * r_mean / (r_shunt + zeff -r_mean *r_shunt)**2
+    #print( r_ntc_std_r)
 
     uncertanty_shunt_tolerance = numpy.divide(
         r_shunt * r_shunt_tolerance * 0.01, numpy.sqrt(3)
@@ -131,20 +133,20 @@ def obrada(config, kanali, zeff):
         "Napon std NTC": U_ntc_std,
         "Napon SHUNT": U_shunt_mean,
         "std SHUNT": U_shunt_std,
-        "Omjer napona sr. vr.": r_mean,
-        "std Omjera ntc/shunt": r_std,
-        "Napon NTC [V]": U_ntc_m_v,
-        "std NTC[V]": U_ntc_s_v,
-        "Napon SHUNT[V]": U_shunt_m_v,
-        "std SHUNT [V]": U_shunt_s_v,
+        "Omjer napona sr. vr.": round(r_mean, 6),
+        "std Omjera ntc/shunt": round(r_std,2),
+        "Napon NTC [V]": round(U_ntc_m_v,2),
+        "std NTC[V]": round(U_ntc_s_v,6),
+        "Napon SHUNT[V]": round(U_shunt_m_v,2),
+        "std SHUNT [V]": round(U_shunt_s_v,6), 
         # "U_shunt_raw":kanali[1],
-        "Otpor": r_ntc,
-        "otpor std NTC": r_ntc_std,
+        "Otpor": round(r_ntc,2),
+        "otpor std NTC": round(r_ntc_std,6),
         "Utjecaj tolerancije shunta": uncertanty_shunt_tolerance,
-        "Temperatura izracunata polinomom": temperatura_polinom,
-        "STD Temperature polinomom": temperatura_polinom_std,
-        "Temperatura izracunata exp.": temperatura_e,
-        "STD temperature Exp.": temperatura_e_std,
+        "Temperatura izracunata polinomom": round(temperatura_polinom,2),
+        "STD Temperature polinomom": round(temperatura_polinom_std,2),
+        "Temperatura izracunata exp.": round(temperatura_e,2),
+        "STD temperature Exp.": round(temperatura_e_std,6),
         "Vrijeme obrade": end_all,
     }
 

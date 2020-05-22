@@ -54,10 +54,10 @@ server = app.server
 LISTA_MJERENIH_PODATAKA = [
     "N",
     "Timestamp",
-    "Napon NTC",
-    "Napon std NTC",
-    "Napon SHUNT",
-    "std SHUNT",
+    #"Napon NTC",
+    #"Napon std NTC",
+    #"Napon SHUNT",
+    #"std SHUNT",
     "Omjer napona sr. vr.",
     "std Omjera ntc/shunt",
     "Napon NTC [V]",
@@ -66,12 +66,12 @@ LISTA_MJERENIH_PODATAKA = [
     "std SHUNT [V]",
     "Otpor",
     "otpor std NTC",
-    "Utjecaj tolerancije shunta",
+    #"Utjecaj tolerancije shunta",
     "Temperatura izracunata polinomom",
     "STD Temperature polinomom",
     "Temperatura izracunata exp.",
     "STD temperature Exp.",
-    "Vrijeme obrade",
+    #"Vrijeme obrade",
 ]
 
 LOG_DAT = "log_mjerenja6.csv"
@@ -429,10 +429,15 @@ def tab3_povratne_vrijednosti_kruga():
                 for i in (LISTA_MJERENIH_PODATAKA)
             ],
             editable=True,
-            row_selectable="single",
+            #row_selectable="single",
             column_selectable="multi",
             fixed_rows={"headers": True},
             style_table={"height": 400},
+            style_cell={
+        'height': 'auto',
+        # all three widths are needed
+        'maxWidth': '60px', 'minWidth' : '40px',       'whiteSpace': 'normal'
+    }
         ),
         html.Div(id="output_display_selected_data"),
         dcc.Graph(id="output_display_column"),
@@ -520,6 +525,7 @@ def get_adc_values_calculate_stuff(n_intervals):
 
     global index_log
     index_log = index_log + 1
+    print(config)
 
     l = obrada(config, kanali=channels, zeff=int(config.get("zeff")))
     log = {"N": index_log}
